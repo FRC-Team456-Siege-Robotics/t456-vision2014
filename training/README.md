@@ -3,6 +3,7 @@ Training and Tutorial Examples
 
 
 <td>Folders</td>
+* hello - Hello world code example
 * simple_camera - Display image frames from webcam (python)
 * filter - Grab image from camera and filter
 * threshold - Threshold target pixels from camera image
