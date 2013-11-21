@@ -1,3 +1,6 @@
 [submodule "external/iniparser"]
 	path = external/iniparser
 	url = https://github.com/ndevilla/iniparser.git
+[submodule "external/libfreenect"]
+	path = external/libfreenect
+	url = https://github.com/OpenKinect/libfreenect.git
