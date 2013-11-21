@@ -1,0 +1,16 @@
+External libraries
+------------------
+
+Folders
+* iniparser - parameter parser for .ini files
+* libfreenect - open source Kinect library
+
+
+NOTES:
+
+libfreenect:
+  To build:
+  1) mkdir libfreenect/build
+  2) cd libfreenect/build
+  3) cmake ..
+  4) make
