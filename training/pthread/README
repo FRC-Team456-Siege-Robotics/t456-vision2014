@@ -8,3 +8,15 @@ run: ./core n
 n is number of cores to run
 
 ./core 4   (for a quad-core)
+
+====================
+Second example
+
+  Combines multi-thread with udp messaging.
+  Files: main.c sender.c
+  Compile: "make ptest"
+  Run: ./ptest
+
+  Writes repeating message to local IP 127.0.0.1
+
+
