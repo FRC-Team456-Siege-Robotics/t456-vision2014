@@ -1,0 +1,10 @@
+
+Multithread / multicore example
+
+compile: "make"
+
+run: ./core n
+
+n is number of cores to run
+
+./core 4   (for a quad-core)
