@@ -14,3 +14,10 @@ libfreenect:
   2) cd libfreenect/build
   3) cmake ..
   4) make
+
+BECAUSE I FORGET: These two commands will pull down the 
+   submodule repositories.  The first clone won't automagically
+   grab the submodule codes
+
+git submodule init
+git submodule update
