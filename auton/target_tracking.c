@@ -189,7 +189,7 @@ void target_tracking( int argc, char** argv )
 #ifdef GRAPHICS
     cvNamedWindow("original", CV_WINDOW_AUTOSIZE);
     cvNamedWindow("binary image", CV_WINDOW_AUTOSIZE);
-    cvNamedWindow("contours", CV_WINDOW_AUTOSIZE);
+//    cvNamedWindow("contours", CV_WINDOW_AUTOSIZE);
 //    cvNamedWindow("original", CV_WINDOW_KEEPRATIO);
 printf("camera_img_fps: %d\n", camera_img_fps);
  
@@ -288,9 +288,9 @@ waitkey_delay = 2.0;
        /*
        **   Use the Morph function to join broken or speckled rectangles
        */
-       cvMorphologyEx( image_binary, image_gray, NULL,
-                         morph_kernel, CV_MOP_CLOSE, 
-                         tracking.morph_closing_iterations);
+//       cvMorphologyEx( image_binary, image_gray, NULL,
+//                         morph_kernel, CV_MOP_CLOSE, 
+//                         tracking.morph_closing_iterations);
 
        t3 = (double)cvGetTickCount();
        time_sum += (t3-t4)/(cvGetTickFrequency()*1000.);
@@ -298,10 +298,10 @@ waitkey_delay = 2.0;
         /*
         **  Process contours and detect targets of interest
         */
-        find_contours( image_gray );
+        find_contours( image_binary );
 
 #ifdef GRAPHICS
-        cvShowImage("contours",image_gray);
+//        cvShowImage("contours",image_gray);
 #endif
 
         /*
@@ -311,14 +311,14 @@ waitkey_delay = 2.0;
         track_targets_over_time( frame_cnt );
 
         /*
-        **  Rank and select highest scoring target
+        **  Determine if it is either a hot, left, or right target
         */
         if ( num_tracked_targets > 0 )
         {
-           T456_calculate_aimpoint( frame_cnt );
-           targ_selected = T456_select_main_target( frame_cnt );
-           draw_target_dot( tracked_targets[targ_selected], 
-                                 image, CV_RGB(0,255,0) );
+//           T456_calculate_aimpoint( frame_cnt );
+//           targ_selected = T456_select_main_target( frame_cnt );
+//           draw_target_dot( tracked_targets[targ_selected], 
+//                                 image, CV_RGB(0,255,0) );
         }
 
         /*
@@ -354,10 +354,10 @@ waitkey_delay = 2.0;
               snprintf(target_message, sizeof(target_message),
                "%06d,%02d,%06.2f,%06.2f,%06.1f,1.0", 
                     frame_cnt,
-                    tracked_targets[targ_selected].type,
-                    tracked_targets[targ_selected].aim_h_angle, 
-                    tracked_targets[targ_selected].aim_v_angle,
-                    tracked_targets[targ_selected].distance);
+                    tracked_targets[0].type,
+                    tracked_targets[0].aim_h_angle, 
+                    tracked_targets[0].aim_v_angle,
+                    tracked_targets[0].distance);
         }
 
 
@@ -927,28 +927,6 @@ void track_targets_over_time ( int frame_cnt )
                  pt1.y = tracked_targets[i].ycenter + 20;
             cvPutText( image, screentext, pt1, &font, CV_RGB(255,255,255));
 
-#ifdef DO_PRED
-           pred_x = tracked_targets[i].xcenter + tracked_targets[i].dx; 
-           pred_y = tracked_targets[i].ycenter + tracked_targets[i].dy; 
-           if ( (pred_x > camera_info.h_pixels) || (pred_y > camera_info.v_pixels) 
-                || (pred_x < 0) || (pred_y < 0 ) )
-           {
-              /*  target predicted off image */
-              for ( j = i; j < (num_tracked_targets - 1); j++ )
-              {
-                 targ_info_copy( &tracked_targets[j+1], 
-                                &tracked_targets[j]);
-              }
-              num_tracked_targets--;
-           }
-           else 
-           {
-              tracked_targets[i].xcenter =
-                 tracked_targets[i].xcenter + tracked_targets[i].dx; 
-              tracked_targets[i].ycenter =
-                 tracked_targets[i].ycenter + tracked_targets[i].dy; 
-           }
-#endif  /* DO_PRED */
         }
      }
   }
