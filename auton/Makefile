@@ -1,8 +1,6 @@
 
 CC = gcc
 
-OBJS = main.o target_logic.o
-
 TARG_OBJS = mini_main.o target_tracking.o target_logic.o target_color.o
 
 SERVER_OBJS = target_server.o 
@@ -22,11 +20,12 @@ PANDA_FLAGS = -mcpu=cortex-a9 -mfpu=neon -ftree-vectorize -fsingle-precision-con
 #  -D GRAPHICS    - display images while processing
 #
 #FRCFLAGS = -O4  -D GRAPHICS
-FRCFLAGS =  -fPIC -Wall -O6  -D GRAPHICS
+#FRCFLAGS =  -fPIC -Wall -O6  -D GRAPHICS
+FRCFLAGS =  -fPIC -O6  -D GRAPHICS
 
 CFLAGS = $(FRCFLAGS) `pkg-config --cflags opencv` 
 
-mini: $(TARG_OBJS) $(SERVER_OBJS) $(PARSE_OBJS)
+auton: $(TARG_OBJS) $(SERVER_OBJS) $(PARSE_OBJS)
 	$(CC) $(FRCFLAGS) `pkg-config --cflags opencv` \
         -o $@ $(TARG_OBJS) $(SERVER_OBJS) \
         $(SERVER_SRC) $(PARSE_OBJS) \
@@ -36,8 +35,6 @@ mini: $(TARG_OBJS) $(SERVER_OBJS) $(PARSE_OBJS)
 
 clean:
 	rm -f $(OBJS) $(TARG_OBJS) $(SERVER_OBJS) $(PARSE_OBJS)
-
-main.o: main.c target_info.h camera_info.h
 
 target_tracking.o: target_tracking.c target_info.h camera_info.h
 

@@ -703,7 +703,6 @@ void track_targets_over_time ( int frame_cnt )
 {
   int i, j;
   float dx, dy, maxd;
-  float pred_x, pred_y;
   int duplicate[MAX_TRACKED_TARGETS];
   int found;
   int time_tracked;
@@ -838,28 +837,6 @@ void track_targets_over_time ( int frame_cnt )
         */
         else {
            tracked_targets[i].time_tracked++;
-#ifdef DO_PRED
-           pred_x = tracked_targets[i].xcenter + tracked_targets[i].dx; 
-           pred_y = tracked_targets[i].ycenter + tracked_targets[i].dy; 
-           if ( (pred_x > CAM_HPIXELS) || (pred_y > CAM_VPIXELS) 
-                || (pred_x < 0) || (pred_y < 0 ) )
-           {
-              /*  target predicted off image */
-              for ( j = i; j < (num_tracked_targets - 1); j++ )
-              {
-                 targ_info_copy( &tracked_targets[j+1], 
-                                &tracked_targets[j]);
-              }
-              num_tracked_targets--;
-           }
-           else 
-           {
-              tracked_targets[i].xcenter =
-                 tracked_targets[i].xcenter + tracked_targets[i].dx; 
-              tracked_targets[i].ycenter =
-                 tracked_targets[i].ycenter + tracked_targets[i].dy; 
-           }
-#endif  /* DO_PRED */
         }
      }
   }

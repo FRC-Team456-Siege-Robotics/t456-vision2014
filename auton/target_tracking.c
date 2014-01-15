@@ -66,8 +66,6 @@ void draw_target_dot( target_struct , IplImage *, CvScalar );
 /*
 **  External function prototypes
 */
-extern int  T456_select_main_target( int );   /* located in target_logic.c */
-extern void T456_calculate_aimpoint( int );      /* adjust aimpoint */
 extern void T456_change_RGB_to_HV( IplImage *, CvMat *, CvMat * ); /* located in target_color.c */
 extern void T456_change_RGB_to_binary( IplImage *, CvMat *);
 extern void T456_filter_image( unsigned char , unsigned char , unsigned char , 
@@ -75,6 +73,8 @@ extern void T456_filter_image( unsigned char , unsigned char , unsigned char ,
 
 extern void T456_parse_vision( char * );
 extern void T456_print_camera_and_tracking_settings();
+
+extern int determine_hot_goal( int );
 
 /*
 **  External server function prototypes
@@ -101,6 +101,7 @@ void target_tracking( int argc, char** argv )
     int  targ_selected = 0;
     int  camera_img_height, camera_img_width, camera_img_fps;
     int  waitkey_delay = 2;
+    int  HOT_GOAL = FALSE;
 
     CvMat *image_gray = 0;
     CvMat *image_binary = 0;
@@ -110,7 +111,7 @@ void target_tracking( int argc, char** argv )
     CvVideoWriter *writer;
     CvSize imgSize;
 
-    int i;
+    int i,j;
     
     pid = (int) getpid();
     /*
@@ -313,13 +314,14 @@ waitkey_delay = 2.0;
         /*
         **  Determine if it is either a hot, left, or right target
         */
-        if ( num_tracked_targets > 0 )
-        {
-//           T456_calculate_aimpoint( frame_cnt );
-//           targ_selected = T456_select_main_target( frame_cnt );
-//           draw_target_dot( tracked_targets[targ_selected], 
-//                                 image, CV_RGB(0,255,0) );
+        HOT_GOAL = determine_hot_goal( frame_cnt );
+
+        if (HOT_GOAL) {
+           printf("HOT GOAL!!\n");
+        } else {
+           printf("no hot goal.\n");
         }
+
 
         /*
         **  Print out tracked targets
@@ -333,7 +335,7 @@ waitkey_delay = 2.0;
              printf("%.2f %.2f ", tracked_targets[i].xcenter, 
                                   tracked_targets[i].ycenter);
              printf("(%.2f) ", tracked_targets[i].aspect_ratio);
-             printf("(d: %.2f) ", tracked_targets[i].distance);
+             printf("(d: %.3f) ", tracked_targets[i].distance);
              printf("%d ", tracked_targets[i].time_tracked);
 
              draw_target_center( tracked_targets[i],
@@ -667,6 +669,12 @@ printf("aspect_ratio: %f\n", aspect_ratio);
             detected_targets[num_detect_targets].v_length = length_1;
          }
 
+         if ( (xmax - xmin) > (ymax - ymin ) ) {
+            detected_targets[num_detect_targets].orientation = 1; /* horiz */
+         }  else {
+            detected_targets[num_detect_targets].orientation = 0; /* vert */
+         }
+
          for ( j = 0; j < 4; j++ ) {
             detected_targets[num_detect_targets].xpt[j] = xpt[j];
             detected_targets[num_detect_targets].ypt[j] = ypt[j];
@@ -753,9 +761,6 @@ void track_targets_over_time ( int frame_cnt )
    CvPoint pt1;
    char  screentext[80];
  
-#ifdef DO_PRED
-  float pred_x, pred_y;
-#endif
 
   dx = dy = 0.0;
 
@@ -851,9 +856,9 @@ void track_targets_over_time ( int frame_cnt )
 
                  pt1.x = tracked_targets[j].xcenter + 20;
                  pt1.y = tracked_targets[j].ycenter;
-            sprintf(screentext,"%d pt", tracked_targets[j].type);
+            sprintf(screentext,"type: %d", tracked_targets[j].type);
             cvPutText( image, screentext, pt1, &font, CV_RGB(0,255,0));
-            sprintf(screentext,"(%.0f ft.)", tracked_targets[j].distance);
+            sprintf(screentext,"(%.3f ft.)", tracked_targets[j].distance);
                  pt1.x = tracked_targets[j].xcenter + 20;
                  pt1.y = tracked_targets[j].ycenter + 20;
             cvPutText( image, screentext, pt1, &font, CV_RGB(255,255,255));
@@ -958,6 +963,8 @@ void targ_info_copy( target_struct *src, target_struct *dest )
   dest->xmax = src->xmax; 
   dest->ymin = src->ymin; 
   dest->ymax = src->ymax; 
+
+  dest->orientation = src->orientation; 
 
   dest->h_length = src->h_length; 
   dest->v_length = src->v_length; 

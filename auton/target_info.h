@@ -11,6 +11,7 @@
 typedef struct {
    int i;
    int type;   /* 5 = 5pt, 3 = 3 pt, 2 = 2 pt, 1 = 1 pt, 0 = unknown */
+   int orientation;  /* 0 = vertical, 1 = horizontal */
    float xpt[4], ypt[4]; 
    float xcenter, ycenter;
    float aimx, aimy;
