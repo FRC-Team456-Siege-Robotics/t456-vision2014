@@ -79,8 +79,8 @@ extern int determine_hot_goal( int );
 /*
 **  External server function prototypes
 */
-void T456_start_server(void);
-void T456_stop_server(void);
+void T456_start_http_server(void);
+void T456_stop_http_server(void);
 
 /*
 **  Error trapping
@@ -182,7 +182,7 @@ void target_tracking( int argc, char** argv )
     /*
     **  Start server listening on port 8080
     */
-    T456_start_server();
+    T456_start_http_server();
 
     /*
     **  Setup graphic display windows using OpenCV
@@ -420,7 +420,7 @@ waitkey_delay = 2.0;
     /*
     **  Stop server listening on port 8080
     */
-    T456_stop_server();
+    T456_stop_http_server();
 
 }
 

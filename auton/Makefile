@@ -18,10 +18,12 @@ PANDA_FLAGS = -mcpu=cortex-a9 -mfpu=neon -ftree-vectorize -fsingle-precision-con
 #  -D DIAG        - print out useful diagnostic information
 #  -D FILE_OUTPUT - write target locations out to a file
 #  -D GRAPHICS    - display images while processing
+#  -D HTTP_SERVER - target message/info via http server :8080
+#  -D UDP_SERVER  - target message/info via udp port
 #
 #FRCFLAGS = -O4  -D GRAPHICS
 #FRCFLAGS =  -fPIC -Wall -O6  -D GRAPHICS
-FRCFLAGS =  -fPIC -O6  -D GRAPHICS
+FRCFLAGS =  -fPIC -O6  -D GRAPHICS -D HTTP_SERVER
 
 CFLAGS = $(FRCFLAGS) `pkg-config --cflags opencv` 
 
