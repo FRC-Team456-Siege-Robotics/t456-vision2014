@@ -32,7 +32,7 @@ void T456_detect_ball_target( CvMat * image_thresh )
    */
    circle_storage = cvCreateMemStorage(0);
 
-   cvSmooth(image_thresh, image_thresh, CV_GAUSSIAN, 15, 0, 0, 0);
+//   cvSmooth(image_thresh, image_thresh, CV_GAUSSIAN, 15, 0, 0, 0);
 
    /*
    **  Find the circles in the input image and store in the 
@@ -40,11 +40,11 @@ void T456_detect_ball_target( CvMat * image_thresh )
    */
    detected_circles = cvHoughCircles( image_thresh, circle_storage,
               CV_HOUGH_GRADIENT,
-              1,
+              2,
               35,     /* minimum distance between centers */
-              1000,    /* upper threshold for detector */
-              2,     /* threshold for center detection */
-              100,      /* min radius */
+              600,    /* upper threshold for detector */
+              8,     /* threshold for center detection */
+              20,      /* min radius */
               500);     /* max radius */
 
 
@@ -59,13 +59,14 @@ void T456_detect_ball_target( CvMat * image_thresh )
           {
              float *p = (float *) cvGetSeqElem( detected_circles, i);
              cvCircle( image, cvPoint(cvRound(p[0])-20, cvRound(p[1])),cvRound(p[2])+1,
-                     CV_RGB(0,150,0), 4, 8, 0);
+                     CV_RGB(0,255,0), -1, 8, 0);
              draw_target_center( cvPoint(cvRound(p[0])-20, cvRound(p[1])),
                                  image,
                                  CV_RGB(255,0,0) );
           }
        }
 
+   cvReleaseMemStorage( &circle_storage );
 
 }
 

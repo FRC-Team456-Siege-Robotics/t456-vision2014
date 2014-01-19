@@ -37,7 +37,7 @@ int STOP = FALSE;
 /*
 **  Local function prototypes
 */
-void *T456_image_proc(void * idp);
+static void *T456_image_proc(void * idp);
 
 /*
 **  Error trapping
@@ -114,9 +114,9 @@ void *T456_camera_funcs( void *arguments)
     printf("image width: %d  image height: %d\n",
               camera_img_width, camera_img_height);
 
-   /*  initialize and set attribute thread variable */
-   pthread_attr_init(&attr);
-   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+    /*  initialize and set attribute thread variable */
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     /*
     **  Time estimation variable
@@ -127,7 +127,6 @@ void *T456_camera_funcs( void *arguments)
     /*
     **  Specify how long to wait for a key press (in msec)
     */
-    waitkey_delay = 15;
     waitkey_delay = 30;
 
     /*
@@ -203,6 +202,9 @@ void *T456_camera_funcs( void *arguments)
     }
     framenum = -1;
 
+cvSaveImage("framegrab.jpg", image, 0 );
+
+
    /*
    **  Release control of camera
    */
@@ -218,9 +220,10 @@ void *T456_camera_funcs( void *arguments)
 /*
 **   Process camera image (frame) main function
 */
-void *T456_image_proc(void * idp)
+static void *T456_image_proc(void * idp)
 {
    char stringid[40];
+   int  i;
    long id = (long) idp;
    int local_framenum;
    int prev_frame = -2;
@@ -230,22 +233,37 @@ void *T456_image_proc(void * idp)
    CvSeq *contours = 0;
    CvSeq *seq = 0;
    CvSeq *polydp_contours = 0;
+   CvSeq *detected_circles = 0;
    CvMemStorage *storage = NULL;
    CvMemStorage *hull_storage = NULL;
-   double area;
+   CvMemStorage *circle_storage = NULL;
+   double area = 0;
+   CvPoint2D32f center;
+   float radius;
 
-  printf("image_proc id: %ld\n", id);
-  sprintf(stringid,"id %ld\n", id);
+   IplImage  *local_image = 0;
+
+   IplConvKernel *morph_kernel;
+
+   printf("image_proc id: %ld\n", id);
+   sprintf(stringid,"id %ld\n", id);
+
 
    /*
    ** Initialize contour storage variables
    */
    storage = cvCreateMemStorage(0);
    hull_storage = cvCreateMemStorage(0);
+   circle_storage = cvCreateMemStorage(0);
 
+   image_thresh = cvCreateMat(camera_img_height, camera_img_width, CV_8UC1);
 
-  image_thresh = cvCreateMat(camera_img_height, camera_img_width, CV_8UC1);
-
+   /*
+   **  Construct a morphological kernel
+   */
+   morph_kernel = cvCreateStructuringElementEx(9, 9, 1, 1,
+                                                CV_SHAPE_ELLIPSE, NULL);
+ 
 
    while( framenum < 0 ) {
     // wait
@@ -254,19 +272,70 @@ void *T456_image_proc(void * idp)
 
    while( framenum != -1 )
    {
-         pthread_mutex_lock( &targ_msg_mutex);
-         local_framenum = framenum;
-         pthread_mutex_unlock( &targ_msg_mutex);
+      /* get global frame number */
+      pthread_mutex_lock( &targ_msg_mutex);
+      local_framenum = framenum;
+      pthread_mutex_unlock( &targ_msg_mutex);
 
-      if ( ((local_framenum % proc_info.nthreads)  == id ) && (local_framenum != prev_frame))
+      if (    ((local_framenum % proc_info.nthreads)  == id ) 
+            && (local_framenum != prev_frame))
       {
          printf("image_proc id: %ld process frame %d\n", id, local_framenum);
 
-         T456_change_RGB_to_binary(image, image_thresh, 
-                                     /* threshold */         100,
+         pthread_mutex_lock( &targ_msg_mutex);
+         local_image = cvCloneImage( image );
+         pthread_mutex_unlock( &targ_msg_mutex);
+
+         T456_change_RGB_to_binary(local_image, image_thresh, 
+                                     /* threshold */         90,
                                      /* hue mid threshold */ 252, 
                                      /* hue span */          30 );
 
+
+//         cvSmooth(image_thresh, image_thresh, CV_GAUSSIAN, 9, 0, 0, 0);
+
+         cvErode(image_thresh, image_thresh, NULL, 19);
+
+         cvDilate(image_thresh, image_thresh, NULL, 11);
+
+//         cvCanny(image_thresh, image_thresh, 1, 256, 3);
+
+//         cvMorphologyEx( image_thresh, image_thresh, NULL,
+//                         morph_kernel, CV_MOP_CLOSE,
+//                         3);
+
+         /*
+         **  Find the circles in the input image and store in the 
+         **   circle list structure.
+         */
+         detected_circles = cvHoughCircles( image_thresh, circle_storage,
+                    CV_HOUGH_GRADIENT,
+                    1,
+                    200,     /* minimum distance between centers */
+                    645,    /* upper threshold for detector */
+                    11,     /* threshold for center detection */
+                    50,      /* min radius */
+                    170);     /* max radius */
+
+
+
+       if ( detected_circles->total != 0 )
+       {
+          printf("num circles: %d\n",detected_circles->total);
+
+          for ( i = 0; i < detected_circles->total; i++ )
+          {
+             float *p = (float *) cvGetSeqElem( detected_circles, i);
+
+             cvCircle( image_thresh, 
+                     cvPoint(cvRound(p[0]), cvRound(p[1])), cvRound(p[2]),
+                     CV_RGB(180,180,180), -1, 8, 0);
+//               cvCircle( image_thresh, cvPointFrom32f(center), (int) radius, 
+//                         CV_RGB(255,255,255), -1, 4, 0);
+          }
+       }
+
+//
 //         T456_detect_ball_target( image_thresh );
 
          /*
@@ -279,14 +348,9 @@ void *T456_image_proc(void * idp)
          /*
          ** Loop through contours and extract the interesting ones
          */
-//         seq = contours;
-//         for ( ; seq != 0; seq = seq->h_next )
-//         {
-             /*
-             **  Calculate convex hull of the contour
-             */
-//             convex_contours = cvConvexHull2(seq, storage, CV_CLOCKWISE, 1 );
-
+         seq = contours;
+         for ( ; seq != 0; seq = seq->h_next )
+         {
 
            /*
             **  Approximate polygonal shape from contours
@@ -294,28 +358,34 @@ void *T456_image_proc(void * idp)
             **              eps, method
             **              eps = 4.0;
             */
-//            polydp_contours = cvApproxPoly(seq, sizeof(CvContour), storage,
-//                                           CV_POLY_APPROX_DP, 2.0, 0);
-
+ //           polydp_contours = cvApproxPoly(seq, sizeof(CvContour), storage,
+ //                                          CV_POLY_APPROX_DP, 3.0, 0);
             /* 
             **  Calculate area of the geometry
             */
-//            area = fabsf(cvContourArea( convex_contours, CV_WHOLE_SEQ, 0));
+//            area = fabsf(cvContourArea( polydp_contours, CV_WHOLE_SEQ, 0));
 
-//              cvDrawContours( image_thresh, polydp_contours,
-//                               CV_RGB(255,255,255), CV_RGB(255,255,255),
-//                               0, -1, 8, cvPoint(0,0));
+            if ( area > 1000 ) 
+            {
+//               cvMinEnclosingCircle(polydp_contours, &center, &radius );
+
+//               cvCircle( image_thresh, cvPointFrom32f(center), (int) radius, 
+//                         CV_RGB(255,255,255), -1, 4, 0);
+
+            }
 
 
 
-//         }
+         }
 
          /*
          **  Show image
          */
          if ( proc_info.graphics != 0 )
          {
-            cvShowImage("Thresh Image",image_thresh);
+//            cvShowImage("Thresh Image",image_thresh);
+            if ( id == 0 )
+               cvShowImage("Thresh Image",image_thresh);
          }
 
          prev_frame = local_framenum;
@@ -323,5 +393,26 @@ void *T456_image_proc(void * idp)
    
    }
 
+ cvSaveImage("framegrab_thresh.jpg", image_thresh, 0 );
+
+   /*
+   ** Clear mem storage  (important!)
+   */
+   cvClearMemStorage(storage);
+   cvClearMemStorage(hull_storage);
+   cvClearMemStorage(circle_storage);
+
+   /*
+   ** Release mem storage (important!)
+   */
+   cvReleaseMemStorage(&storage);
+   cvReleaseMemStorage(&hull_storage);
+   cvReleaseMemStorage( &circle_storage );
+
+
+   cvReleaseImage( &local_image );
+   cvReleaseMat( &image_thresh );
+
    printf("image_proc id: %ld (exiting)\n", id);
+
 }
