@@ -22,8 +22,7 @@
 extern char target_message[100];
 extern int  target_message_length;
 
-pthread_t udp_msg_thread;      /* thread for messages out via UDP */
-pthread_mutex_t  targ_msg_mutex;        /* locking variable */
+extern pthread_mutex_t  targ_msg_mutex;        /* locking variable */
 
 /*
 **  This function will be called by mongoose on every new request.
@@ -90,9 +89,8 @@ void T456_udp_die(char *s)
 void *T456_send_udp_message_func()
 {
     struct sockaddr_in si_other;
-    int s, i, slen=sizeof(si_other);
+    int s, slen=sizeof(si_other);
     char buf[BUFLEN];
-    char message[BUFLEN];
  
     if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
     {

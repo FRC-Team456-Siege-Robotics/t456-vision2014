@@ -15,7 +15,10 @@
 
 #include <sys/types.h>
 #include <unistd.h>
+
+/* includes for udp option with threads */
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "camera_info.h"
 #include "target_info.h"
@@ -38,8 +41,10 @@ IplImage      *image = 0;
 
 CvFont        font;
 
+
 char target_message[100];
 int  target_message_length;
+pthread_mutex_t  targ_msg_mutex;        /* locking variable */
 
 double time_sum = 0;
 
@@ -66,6 +71,7 @@ void draw_target_dot( target_struct , IplImage *, CvScalar );
 /*
 **  External function prototypes
 */
+extern void *T456_send_udp_message_func();
 extern void T456_change_RGB_to_HV( IplImage *, CvMat *, CvMat * ); /* located in target_color.c */
 extern void T456_change_RGB_to_binary( IplImage *, CvMat *);
 extern void T456_filter_image( unsigned char , unsigned char , unsigned char , 
@@ -112,6 +118,10 @@ void target_tracking( int argc, char** argv )
     CvSize imgSize;
 
     int i,j;
+
+    pthread_attr_t attr;           /* attribute thread */
+    pthread_t udp_msg_thread;      /* thread for messages out via UDP */
+    int  msg_ret_val;
     
     pid = (int) getpid();
     /*
@@ -180,9 +190,37 @@ void target_tracking( int argc, char** argv )
     T456_print_camera_and_tracking_settings();
 
     /*
+    **  Initialize initial message to control system
+    **   this is done before spawning communication thread
+    */
+    target_message_length =
+                   snprintf(target_message, sizeof(target_message),
+                  "-1,00,000000,000000,000000,0000");
+
+    /*
     **  Start server listening on port 8080
     */
+#ifdef  HTTP_SERVER
     T456_start_http_server();
+#endif
+
+#ifdef  UDP_SERVER
+   /*  initialize and set attribute thread variable */
+   pthread_attr_init(&attr);
+   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+   /**  Initialize the mutex (locking/unlocking for message info) */
+   if (pthread_mutex_init(&targ_msg_mutex, NULL))
+   {
+      printf("Unable to initialize a mutex for message\n");
+      exit(-1);
+   }
+
+   /**  Create and execute communication thread  */
+   msg_ret_val = pthread_create( &udp_msg_thread, NULL,
+                                 &T456_send_udp_message_func, NULL);
+#endif
+
 
     /*
     **  Setup graphic display windows using OpenCV
@@ -314,12 +352,15 @@ waitkey_delay = 2.0;
         /*
         **  Determine if it is either a hot, left, or right target
         */
-        HOT_GOAL = determine_hot_goal( frame_cnt );
+        if ( num_tracked_targets > 1 )
+        {
+           HOT_GOAL = determine_hot_goal( frame_cnt );
 
-        if (HOT_GOAL) {
-           printf("HOT GOAL!!\n");
-        } else {
-           printf("no hot goal.\n");
+           if (HOT_GOAL) {
+              printf("HOT GOAL!!\n");
+           } else {
+              printf("no hot goal.\n");
+           }
         }
 
 
@@ -420,7 +461,9 @@ waitkey_delay = 2.0;
     /*
     **  Stop server listening on port 8080
     */
+#ifdef HTTP_SERVER
     T456_stop_http_server();
+#endif
 
 }
 
@@ -613,7 +656,7 @@ printf("aspect_ratio: %f\n", aspect_ratio);
          distance = 0.01745 * ((MAX(length_1,length_2) / 640.0) * 48.8) / 2.0;
          distance = (32.0/2.0) / tanf(distance);
 
-         if ( (distance/12.0) < 45 ) /* field is 54 ft long */
+         if ( (distance/12.0) < 20 ) /* field is 54 ft long */
          {
             isTarget = TRUE;
             detected_targets[num_detect_targets].type = 1;
@@ -625,7 +668,7 @@ printf("aspect_ratio: %f\n", aspect_ratio);
       **  check for horizontal target (4" by 23.5")
       **   aspect ratio = 5.875
       */
-      if ( ((aspect_ratio >= 5.2) && (aspect_ratio < 6.5)) ) 
+      if ( ((aspect_ratio >= 5.0) && (aspect_ratio < 7.0)) ) 
       {
          /*
          **  Calculate distance to target
@@ -634,7 +677,7 @@ printf("aspect_ratio: %f\n", aspect_ratio);
          distance = 0.01745 * ((MAX(length_1,length_2) / 640.0) * 48.8) / 2.0;
          distance = (23.5/2.0) / tanf(distance);
 
-         if ( (distance/12.0) < 45 ) 
+         if ( (distance/12.0) < 20 ) 
          {
             isTarget = TRUE;
             detected_targets[num_detect_targets].type = 2;
