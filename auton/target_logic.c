@@ -2,7 +2,6 @@
 /*
 **  Target tracking logic code
 */
-
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/legacy/legacy.hpp"
 #include <stdio.h>
@@ -72,11 +71,30 @@ int determine_hot_goal ( frame_cnt )
 
    /*  debug print section to verify orientation */
    for (i = 0; i < num_tracked_targets; i++ )
-   {
-      printf("target %d: orientation: %d\n",
-        i, tracked_targets[i].orientation );
-   }
+   { 
+      for (j = 0; j < num_tracked_targets; j++)
+      {
+          if ( j != i) 
+          {
+              printf("target %d: orientation: %d\n",
+                         i, tracked_targets[i].orientation );
+       
+              /* check orientation of targets */
+              if ( tracked_targets[i].orientation != 
+                   tracked_targets[j].orientation) 
+              {
+                 /*  check and see if they are both similar distance away */
+                 if ( fabs(tracked_targets[i].distance -
+                           tracked_targets[j].distance ) < 6.0 )
+                 {
+                    HOT_GOAL = TRUE;
+                    return(HOT_GOAL);
+                 }
 
+              }
+          }
+       }
+    }
    /*
    ** We have two ways to determine if the goal is hot or not.
    ** 1) simply see if we have a horizontal and vertical 
