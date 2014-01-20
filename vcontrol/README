@@ -1,0 +1,32 @@
+This directory contains code for the "controller" code.
+
+Controller code keeps track of the state of the match as received via UDP
+from the CRIO LabView code:
+
+States
+0) Startup  (Initial state from system boot)
+1) Begin Auton
+2) End Auton
+3) End Match
+4) Testing: Start Ball Tracking
+5) Testing: Stop Ball Tracking
+6) Testing: Start Auton Tracking
+7) Testing: Stop Auton Tracking
+
+Actions for each State:
+0) Startup
+    * start tracking auton targets (horizontal and vertical bars)
+    * send tracking information vi UDP back to CRIO
+
+1) Begin Auton
+    * continue auton target tracking
+    * startup ball tracking
+
+2) End Auton
+    * stop auton target tracking
+    * continue ball tracking
+
+3) End Match
+   * stop ball tracking
+   * shutdown computer
+
