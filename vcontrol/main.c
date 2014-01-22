@@ -93,6 +93,10 @@ int main( int argc, char **argv)
       "my_auto_stub",   /*  argv[0], the name of the program */
       NULL    /* the argument list must terminate with NULL */
    };
+   char *arg_balllist[] = {
+      "balltrack",   /*  argv[0], the name of the program */
+      NULL    /* the argument list must terminate with NULL */
+   };
 
    printf("parent process ID %d\n", (int) getpid() );
 
@@ -121,15 +125,58 @@ int main( int argc, char **argv)
                if ( auton_pid != -1 ) 
                   kill(auton_pid, SIGTERM);
                if ( balltrack_pid != -1 ) 
-                  kill(auton_pid, SIGTERM);
+                  kill(balltrack_pid, SIGTERM);
                exit(0);
                break;
+
             case 0:   /* startup, begin auton program */
-               /* Spawn the auton process */
-               printf("State 0: spawning auton program\n");
-               auton_pid = spawn("auto_stub", arg_list);
-               printf("auton process id: %d\n", auton_pid );
+               if ( auton_pid == -1 ) {
+                  /* Spawn the auton process */
+                  printf("State 0: spawning auton program\n");
+                  auton_pid = spawn("auto_stub", arg_list);
+                  printf("auton process id: %d\n", auton_pid );
+               }
                break;
+
+            case 1: // **   1) Begin Auton
+               if ( auton_pid == -1 ) {
+                  /* Spawn the auton process */
+                  printf("State 1: spawning auton program\n");
+                  auton_pid = spawn("auto_stub", arg_list);
+                  printf("auton process id: %d\n", auton_pid );
+               }
+               break;
+
+            case 2: // **   2) End Auton
+               if ( auton_pid != -1 ) 
+                  kill(auton_pid, SIGTERM);
+               if ( balltrack_pid == -1 ) {
+                  /* Spawn the auton process */
+                  printf("State 2: spawning balltrack program\n");
+                  balltrack_pid = spawn("balltrack_stub", arg_balllist);
+                  printf("balltrack process id: %d\n", balltrack_pid );
+               }
+               break;
+
+            case 3: // **   3) End Match (shutdown)
+               if ( auton_pid != -1 ) 
+                  kill(auton_pid, SIGTERM);
+               if ( balltrack_pid != -1 ) 
+                  kill(balltrack_pid, SIGTERM);
+               break;
+
+            case 4: // **   4) Testing: Start Ball Tracking
+               break;
+
+            case 5: // **   5) Testing: Stop Ball Tracking
+               break;
+
+            case 6: // **   6) Testing: Start Auton Tracking
+               break;
+
+            case 7: // **   7) Testing: Stop Auton Tracking
+               break;
+
             default:
                printf("Unknown state! %d\n", CURRENT_STATE);
                CURRENT_STATE = prev_state;  /* reset back to previous */
