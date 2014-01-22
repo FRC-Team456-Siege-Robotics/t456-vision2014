@@ -395,12 +395,12 @@ waitkey_delay = 2.0;
         } else {
            target_message_length =
               snprintf(target_message, sizeof(target_message),
-               "%06d,%02d,%06.2f,%06.2f,%06.1f,1.0", 
+               "%06d,%d,%02d,", 
                     frame_cnt,
-                    tracked_targets[0].type,
-                    tracked_targets[0].aim_h_angle, 
-                    tracked_targets[0].aim_v_angle,
-                    tracked_targets[0].distance);
+		    HOT_GOAL,
+		    num_tracked_targets
+		    // 1-n targets coordinates,...,
+		    );
         }
 
 

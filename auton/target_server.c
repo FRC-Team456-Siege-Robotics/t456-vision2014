@@ -14,7 +14,7 @@
 
 #define SERVER "127.0.0.1"
 #define BUFLEN 100  //Max length of buffer
-#define PORT 8888   //The port on which to send data
+#define PORT 1130   //The port on which to send data
 
 /*  include for http server option */
 #include "mongoose.h"
