@@ -392,25 +392,29 @@ waitkey_delay = 2.0;
            target_message_length =
               snprintf(target_message, sizeof(target_message),
               "%06d,00,000000,000000,000000,0000", frame_cnt);
-        } else if ( num_tracked_targets == 1 ) {
+        } 
+
+        if ( num_tracked_targets == 1 ) {
+	// string format: frame,hot,n_targets,X0,Y0,...,Xn, Yn
            target_message_length =
-			  // string format: frame,hot,n_targets,X0,Y0,...,Xn, Yn
               snprintf(target_message, sizeof(target_message),
                "%06d,0,1,%0.6f,%0.6f",
-                    frame_cnt,
-					detected_targets[0].xcenter,  /* detected_targets or tracked_targets ? */
-					detected_targets[0].ycenter);
-        } else {
-			target_message_length =
-				// string format: frame,hot,n_targets,X0,Y0,...,Xn, Yn
-				snprintf(target_message, sizeof(target_message),
-				"%06d,%d,2,%0.6f,%0.6f,%0.6f,%0.6f",   /* if more than 1 target, just give first two targets */
-					frame_cnt,
-					HOT_GOAL,
-					detected_targets[0].xcenter,
-					detected_targets[0].ycenter,
-					detected_targets[1].xcenter,
-					detected_targets[1].ycenter);
+                    frame_cnt, tracked_targets[0].xcenter, 
+				tracked_targets[0].ycenter);
+        } 
+
+        if ( num_tracked_targets == 2 ) {
+	// string format: frame,hot,n_targets,X0,Y0,...,Xn, Yn
+	   target_message_length =
+	      snprintf(target_message, sizeof(target_message),
+		"%06d,%d,2,%0.6f,%0.6f,%0.6f,%0.6f", 
+		frame_cnt,
+ 		HOT_GOAL,
+		tracked_targets[0].xcenter,
+		tracked_targets[0].ycenter,
+		tracked_targets[1].xcenter,
+		tracked_targets[1].ycenter);
+        }
 
 #ifdef WRITE_VIDEO
        cvWriteFrame(writer, image);
