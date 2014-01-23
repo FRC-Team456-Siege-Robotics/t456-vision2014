@@ -166,15 +166,35 @@ int main( int argc, char **argv)
                break;
 
             case 4: // **   4) Testing: Start Ball Tracking
+			   if ( balltrack_pid == -1) {
+				   printf("State 4: spawning ball track program\n");
+				   balltrack_pid = spawn("balltrack_stub", arg_balllist);
+			       printf("balltrack process id: %d\n", balltrack_pid);
+			   }
                break;
 
             case 5: // **   5) Testing: Stop Ball Tracking
+			   if ( balltrack_pid != -1) {
+				   printf("State 5: killing ball track program\n");
+				   kill(balltrack_pid, SIGTERM);
+				   balltrack_pid = -1;
+			   }
                break;
 
             case 6: // **   6) Testing: Start Auton Tracking
+			   if ( auton_pid == -1 ) {
+				   printf("State 5: spawning auton program\n");
+				   auton_pid = spawn("auton_stub", arg_list);
+				   printf("auton pid: %d\n", auton_pid);
+			   }
                break;
 
             case 7: // **   7) Testing: Stop Auton Tracking
+			   if ( auton_pid != -1 ) {
+				   printf("State 7: killing auton program\n");
+				   kill(auton_pid, SIGTERM);
+				   auton_pid = -1;
+			   }
                break;
 
             default:
