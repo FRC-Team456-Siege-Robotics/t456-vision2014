@@ -12,7 +12,7 @@ CFLAGS = `pkg-config --cflags opencv` $(INC)
 #
 #  Define libraries to add
 #
-LIBS = `pkg-config --libs opencv`  -lpthread ../external/iniparser/libiniparser.a -lX11
+LIBS = `pkg-config --libs opencv`  -lpthread ../external/iniparser/libiniparser.a -lX11 -lm
 
 
 #
