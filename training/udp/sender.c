@@ -11,7 +11,7 @@
  
 #define SERVER "127.0.0.1"
 #define BUFLEN 1024  //Max length of buffer
-#define PORT 8888   //The port on which to send data
+#define PORT 1140   //The port on which to send data
  
 void die(char *s)
 {
@@ -54,6 +54,7 @@ int main(void)
          
         //receive a reply and print it
         //clear the buffer by filling null, it might have previously received data
+		/*
         memset(buf,'\0', BUFLEN);
         //try to receive some data, this is a blocking call
         if (recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) == -1)
@@ -62,6 +63,7 @@ int main(void)
         }
          
         puts(buf);
+		*/
     }
  
     close(s);

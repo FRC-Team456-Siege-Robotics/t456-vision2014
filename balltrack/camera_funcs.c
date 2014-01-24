@@ -256,6 +256,8 @@ static void *T456_image_proc(void * idp)
    hull_storage = cvCreateMemStorage(0);
    circle_storage = cvCreateMemStorage(0);
 
+   local_image = cvCreateImage(cvSize(camera_img_width,camera_img_height),
+                               8, 3);
    image_thresh = cvCreateMat(camera_img_height, camera_img_width, CV_8UC1);
 
    /*
@@ -283,26 +285,18 @@ static void *T456_image_proc(void * idp)
          printf("image_proc id: %ld process frame %d\n", id, local_framenum);
 
          pthread_mutex_lock( &targ_msg_mutex);
-         local_image = cvCloneImage( image );
+         cvCopy(image, local_image, NULL);
          pthread_mutex_unlock( &targ_msg_mutex);
 
          T456_change_RGB_to_binary(local_image, image_thresh, 
-                                     /* threshold */         90,
+                                     /* threshold */         70,
                                      /* hue mid threshold */ 252, 
                                      /* hue span */          30 );
 
 
-//         cvSmooth(image_thresh, image_thresh, CV_GAUSSIAN, 9, 0, 0, 0);
-
          cvErode(image_thresh, image_thresh, NULL, 19);
 
          cvDilate(image_thresh, image_thresh, NULL, 11);
-
-//         cvCanny(image_thresh, image_thresh, 1, 256, 3);
-
-//         cvMorphologyEx( image_thresh, image_thresh, NULL,
-//                         morph_kernel, CV_MOP_CLOSE,
-//                         3);
 
          /*
          **  Find the circles in the input image and store in the 
@@ -314,7 +308,7 @@ static void *T456_image_proc(void * idp)
                     200,     /* minimum distance between centers */
                     645,    /* upper threshold for detector */
                     11,     /* threshold for center detection */
-                    50,      /* min radius */
+                    20,      /* min radius */
                     170);     /* max radius */
 
 
@@ -383,7 +377,6 @@ static void *T456_image_proc(void * idp)
          */
          if ( proc_info.graphics != 0 )
          {
-//            cvShowImage("Thresh Image",image_thresh);
             if ( id == 0 )
                cvShowImage("Thresh Image",image_thresh);
          }
