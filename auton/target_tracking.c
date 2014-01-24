@@ -414,7 +414,6 @@ waitkey_delay = 2.0;
 		tracked_targets[0].ycenter,
 		tracked_targets[1].xcenter,
 		tracked_targets[1].ycenter);
->>>>>>> 132fb99a6b36cfbad645d2da44a04dfc3c1d755f
         }
 
 #ifdef WRITE_VIDEO
