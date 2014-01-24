@@ -133,7 +133,7 @@ int main( int argc, char **argv)
                if ( auton_pid == -1 ) {
                   /* Spawn the auton process */
                   printf("State 0: spawning auton program\n");
-                  auton_pid = spawn("auto_stub", arg_list);
+                  auton_pid = spawn("./auto_stub", arg_list);
                   printf("auton process id: %d\n", auton_pid );
                }
                break;
@@ -142,7 +142,7 @@ int main( int argc, char **argv)
                if ( auton_pid == -1 ) {
                   /* Spawn the auton process */
                   printf("State 1: spawning auton program\n");
-                  auton_pid = spawn("auto_stub", arg_list);
+                  auton_pid = spawn("./auto_stub", arg_list);
                   printf("auton process id: %d\n", auton_pid );
                }
                break;
@@ -153,7 +153,7 @@ int main( int argc, char **argv)
                if ( balltrack_pid == -1 ) {
                   /* Spawn the auton process */
                   printf("State 2: spawning balltrack program\n");
-                  balltrack_pid = spawn("balltrack_stub", arg_balllist);
+                  balltrack_pid = spawn("./balltrack_stub", arg_balllist);
                   printf("balltrack process id: %d\n", balltrack_pid );
                }
                break;
@@ -168,7 +168,7 @@ int main( int argc, char **argv)
             case 4: // **   4) Testing: Start Ball Tracking
 			   if ( balltrack_pid == -1) {
 				   printf("State 4: spawning ball track program\n");
-				   balltrack_pid = spawn("balltrack_stub", arg_balllist);
+				   balltrack_pid = spawn("./balltrack_stub", arg_balllist);
 			       printf("balltrack process id: %d\n", balltrack_pid);
 			   }
                break;
@@ -184,7 +184,7 @@ int main( int argc, char **argv)
             case 6: // **   6) Testing: Start Auton Tracking
 			   if ( auton_pid == -1 ) {
 				   printf("State 5: spawning auton program\n");
-				   auton_pid = spawn("auton_stub", arg_list);
+				   auton_pid = spawn("./auton_stub", arg_list);
 				   printf("auton pid: %d\n", auton_pid);
 			   }
                break;
