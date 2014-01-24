@@ -12,9 +12,9 @@
 #include<arpa/inet.h>
 #include<sys/socket.h>
 
-#define SERVER "127.0.0.1"
+#define SERVER "10.4.56.2"
 #define BUFLEN 100  //Max length of buffer
-#define PORT 1130   //The port on which to send data
+#define PORT 8888   //The port on which to send data
 
 /*  include for http server option */
 #include "mongoose.h"

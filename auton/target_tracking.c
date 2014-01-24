@@ -195,7 +195,7 @@ void target_tracking( int argc, char** argv )
     */
     target_message_length =
                    snprintf(target_message, sizeof(target_message),
-                  "-1,00,000000,000000,000000,0000");
+                  "-1,0");
 
     /*
     **  Start server listening on port 8080
@@ -391,29 +391,21 @@ waitkey_delay = 2.0;
         if ( num_tracked_targets == 0 ) {
            target_message_length =
               snprintf(target_message, sizeof(target_message),
-              "%06d,00,000000,000000,000000,0000", frame_cnt);
+              "%06d,0", frame_cnt);
         } 
 
         if ( num_tracked_targets == 1 ) {
 	// string format: frame,hot,n_targets,X0,Y0,...,Xn, Yn
            target_message_length =
               snprintf(target_message, sizeof(target_message),
-               "%06d,0,1,%0.6f,%0.6f",
-                    frame_cnt, tracked_targets[0].xcenter, 
-				tracked_targets[0].ycenter);
+               "%06d,0", frame_cnt);
         } 
 
         if ( num_tracked_targets == 2 ) {
 	// string format: frame,hot,n_targets,X0,Y0,...,Xn, Yn
 	   target_message_length =
 	      snprintf(target_message, sizeof(target_message),
-		"%06d,%d,2,%0.6f,%0.6f,%0.6f,%0.6f", 
-		frame_cnt,
- 		HOT_GOAL,
-		tracked_targets[0].xcenter,
-		tracked_targets[0].ycenter,
-		tracked_targets[1].xcenter,
-		tracked_targets[1].ycenter);
+		"%06d,%d", frame_cnt, HOT_GOAL);
         }
 
 #ifdef WRITE_VIDEO
@@ -638,9 +630,9 @@ void Detect_Targets( CvSeq *raw_contours, CvMat *input_image )
                                   xpt[2], ypt[2] ) );
       max_cosine = MAX( cosine1, cosine2 );
       // was 0.25
-      if ( max_cosine > 0.45 ) {
-         return;
-      }
+//      if ( max_cosine > 0.45 ) {
+//         return;
+//      }
 
       /* 
       **  Calculate aspect ratio
@@ -659,7 +651,7 @@ printf("aspect_ratio: %f\n", aspect_ratio);
       **  check for vertical target (4" by 32")
       **   aspect ratio = 8.0
       */
-      if ( ((aspect_ratio > 7.5) && (aspect_ratio < 8.5)) ) 
+      if ( ((aspect_ratio > 7.2) && (aspect_ratio < 9.8)) ) 
       {
          /*
          **  Calculate distance to vertical target
@@ -680,7 +672,7 @@ printf("aspect_ratio: %f\n", aspect_ratio);
       **  check for horizontal target (4" by 23.5")
       **   aspect ratio = 5.875
       */
-      if ( ((aspect_ratio >= 5.0) && (aspect_ratio < 7.0)) ) 
+      if ( ((aspect_ratio >= 5.0) && (aspect_ratio <= 7.0)) ) 
       {
          /*
          **  Calculate distance to target
