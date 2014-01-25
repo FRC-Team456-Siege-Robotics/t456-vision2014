@@ -1,7 +1,7 @@
 
 CC = gcc
 
-TARG_OBJS = mini_main.o target_tracking.o target_logic.o target_color.o
+TARG_OBJS = main.o target_tracking.o target_logic.o target_color.o
 
 SERVER_OBJS = target_server.o 
 
@@ -9,7 +9,7 @@ PARSE_OBJS = parse_config.o
 
 SERVER_SRC = ../external/mongoose/mongoose.c
 
-TAR_FILES = mini_main.c target_tracking.c target_logic.c target_color.c \
+TAR_FILES = main.c target_tracking.c target_logic.c target_color.c \
               camera_info.h  target_info.h Makefile
 
 PANDA_FLAGS = -mcpu=cortex-a9 -mfpu=neon -ftree-vectorize -fsingle-precision-constant -ffast-math

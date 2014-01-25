@@ -322,7 +322,6 @@ waitkey_delay = 2.0;
        T456_change_RGB_to_binary( image, image_binary );
         
         
-       t4 = (double)cvGetTickCount();
        /*
        **   Use the Morph function to join broken or speckled rectangles
        */
@@ -330,17 +329,10 @@ waitkey_delay = 2.0;
 //                         morph_kernel, CV_MOP_CLOSE, 
 //                         tracking.morph_closing_iterations);
 
-       t3 = (double)cvGetTickCount();
-       time_sum += (t3-t4)/(cvGetTickFrequency()*1000.);
- 
         /*
         **  Process contours and detect targets of interest
         */
         find_contours( image_binary );
-
-#ifdef GRAPHICS
-//        cvShowImage("contours",image_gray);
-#endif
 
         /*
         **  Process raw target detections and compare with current 

@@ -37,10 +37,6 @@ void T456_set_camera_and_tracking_defaults();
 void T456_parse_vision( char *input_config_file)
 {
    dictionary *dict;
-   char  *dist_string_3pt;
-   char  *ang_string_3pt;
-   char  *dist_string_2pt;
-   char  *ang_string_2pt;
 
    fprintf(stderr, "Parsing input config file: %s\n", input_config_file);
 
@@ -131,8 +127,6 @@ void T456_set_camera_and_tracking_defaults()
    tracking.diag = 0;
    tracking.h_ang_correction = 0.0;
 
-   lut_3pt.numvals = 0;
-   lut_2pt.numvals = 0;
 }
 
 /*
@@ -140,8 +134,6 @@ void T456_set_camera_and_tracking_defaults()
 */
 void T456_print_camera_and_tracking_settings()
 {
-   int i;
-
    printf("\n");
    printf("Camera Settings: \n");
    printf("  camera_info.h_fov = %.2f\n", camera_info.h_fov);
