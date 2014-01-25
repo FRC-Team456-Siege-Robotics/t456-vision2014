@@ -72,7 +72,6 @@ void draw_target_dot( target_struct , IplImage *, CvScalar );
 **  External function prototypes
 */
 extern void *T456_send_udp_message_func();
-extern void T456_change_RGB_to_HV( IplImage *, CvMat *, CvMat * ); /* located in target_color.c */
 extern void T456_change_RGB_to_binary( IplImage *, CvMat *);
 extern void T456_filter_image( unsigned char , unsigned char , unsigned char , 
                  unsigned char *);
@@ -185,8 +184,8 @@ void target_tracking( int argc, char** argv )
     /*
     **  Parse the config file
     */
-//    T456_parse_vision( "../config/t456-vision.ini" );
-    T456_parse_vision( "/usr/local/config/t456-vision.ini" );
+    T456_parse_vision( "t456-vision.ini" );
+//    T456_parse_vision( "/usr/local/config/t456-vision.ini" );
     T456_print_camera_and_tracking_settings();
 
     /*

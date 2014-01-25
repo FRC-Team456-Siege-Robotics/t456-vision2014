@@ -20,21 +20,15 @@
 #ifdef MAIN
    camera_struct  camera_info;
    tracking_struct tracking;
-   lut_struct lut_3pt;
-   lut_struct lut_2pt;
 #else
    extern camera_struct  camera_info;
    extern tracking_struct tracking;
-   extern lut_struct lut_3pt;
-   extern lut_struct lut_2pt;
 #endif
 
 /*
 **  local function prototypes
 */
 void T456_set_camera_and_tracking_defaults();
-void T456_parse_3pt_strings( char * ,  char *);
-void T456_parse_2pt_strings( char * ,  char *);
 
 /*
 **  Parse input file for camera settings 
@@ -110,24 +104,6 @@ void T456_parse_vision( char *input_config_file)
       tracking.h_ang_correction = 
          (float) iniparser_getdouble( dict, "tracking:h_ang_correction", 0);
 
-      /*
-      **  Get lookup table settings (3pt and 2pt)
-      */
-      lut_3pt.numvals = iniparser_getint( dict, "lut_3pt:numvals", 0);
-      lut_2pt.numvals = iniparser_getint( dict, "lut_2pt:numvals", 0);
-
-      if ( lut_2pt.numvals > 0 ) {
-         dist_string_2pt = iniparser_getstring( dict, "lut_2pt:dist", NULL);
-         ang_string_2pt = iniparser_getstring( dict, "lut_2pt:offset", NULL);
-         T456_parse_2pt_strings( dist_string_2pt, ang_string_2pt);
-      }
-
-      if ( lut_3pt.numvals > 0 ) {
-         dist_string_3pt = iniparser_getstring( dict, "lut_3pt:dist", NULL);
-         ang_string_3pt = iniparser_getstring( dict, "lut_3pt:offset", NULL);
-         T456_parse_3pt_strings( dist_string_3pt, ang_string_3pt);
-      }
-
    }
    
    iniparser_freedict( dict );
@@ -189,116 +165,8 @@ void T456_print_camera_and_tracking_settings()
    printf("  tracking.h_ang_correction = %.1f\n", tracking.h_ang_correction);
    printf("\n");
 
-   printf("Aimpoint Lookup Table Settings: \n");
-   printf("  lut_3pt.numvals = %d\n", lut_3pt.numvals);
-   printf("  distance(ft)   offset(pixels)\n");
-   for ( i = 0; i < lut_3pt.numvals; i++ ) 
-   {
-      printf("     %5.1f        %8.1f\n", 
-               lut_3pt.dist[i], lut_3pt.offset[i] );
-   }
-   printf("\n");
-
-   printf("  lut_2pt.numvals = %d\n", lut_2pt.numvals);
-   for ( i = 0; i < lut_2pt.numvals; i++ ) 
-   {
-      printf("     %5.1f        %8.1f\n", 
-               lut_2pt.dist[i], lut_2pt.offset[i] );
-   }
-   printf("\n");
 }
 
-/*
-**  Parse distance and offset strings for 3pt LUT
-*/
-void T456_parse_3pt_strings( char * dist_string, char * ang_string)
-{
-   const char delims[] = ",";
-   char *token, *str_copy;
-   float dist_val, ang_val;
-   int i;
-
-   /*
-   **  Parse the distance data string
-   */
-   i = 0;
-   str_copy = strdup( dist_string );
-   token = strtok(str_copy, delims);
-   while( token != NULL )
-   {
-      sscanf(token,"%f", &dist_val);
-      lut_3pt.dist[i] = dist_val;
-      i++;
-      token = strtok(NULL, delims);
-   }
-
-   /*
-   **  Parse the aim offset data string
-   */
-   i = 0;
-   str_copy = strdup( ang_string );
-   token = strtok(str_copy, delims);
-   while( token != NULL )
-   {
-      sscanf(token,"%f", &ang_val);
-      lut_3pt.offset[i] = ang_val;
-      i++;
-      token = strtok(NULL, delims);
-   }
-
-   /*
-   ** Precalculate the difference between the distance and aim offset
-   */
-   for ( i = 0; i < (lut_3pt.numvals - 1); i++ )
-   {
-      lut_3pt.dist_delta[i] = lut_3pt.dist[i+1] - lut_3pt.dist[i];
-      lut_3pt.offset_delta[i] = lut_3pt.offset[i+1] - lut_3pt.offset[i];
-   }
-
-}
-
-/*
-**  Parse distance and offset strings for 2pt LUT
-*/
-void T456_parse_2pt_strings( char * dist_string, char * ang_string)
-{
-   const char delims[] = ",";
-   char *token, *str_copy;
-   float dist_val, ang_val;
-   int i;
-
-   i = 0;
-   str_copy = strdup( dist_string );
-   token = strtok(str_copy, delims);
-   while( token != NULL )
-   {
-      sscanf(token,"%f", &dist_val);
-      lut_2pt.dist[i] = dist_val;
-      i++;
-      token = strtok(NULL, delims);
-   }
-
-   i = 0;
-   str_copy = strdup( ang_string );
-   token = strtok(str_copy, delims);
-   while( token != NULL )
-   {
-      sscanf(token,"%f", &ang_val);
-      lut_2pt.offset[i] = ang_val;
-      i++;
-      token = strtok(NULL, delims);
-   }
-
-   /*
-   ** Precalculate the difference between the distance and aim offset
-   */
-   for ( i = 0; i < (lut_2pt.numvals - 1); i++ )
-   {
-      lut_2pt.dist_delta[i] = lut_2pt.dist[i+1] - lut_2pt.dist[i];
-      lut_2pt.offset_delta[i] = lut_2pt.offset[i+1] - lut_2pt.offset[i];
-   }
-
-}
 
 /*
 **  TEST MAIN SECTION

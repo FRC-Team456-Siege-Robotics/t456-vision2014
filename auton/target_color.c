@@ -38,89 +38,10 @@ extern tracking_struct tracking;
 /* 
 ** prototypes of functions
 */
-void T456_change_RGB_to_HV( IplImage *, CvMat *, CvMat *);
-
-void T456_rgb_to_hsv( unsigned char , unsigned char , unsigned char , 
-                      unsigned char *, unsigned char * );
 
 void T456_change_RGB_to_binary( IplImage *, CvMat *);
 void T456_filter_image( unsigned char , unsigned char , unsigned char , 
                  unsigned char *);
-
-/* 
-**  functions 
-*/
-void T456_change_RGB_to_HV( IplImage *rgb, CvMat *hue, CvMat *val )
-{
-  register int y;
-  register unsigned char r,g,b;
-  register char *data;
-  register uchar *hue_data;
-  register uchar *val_data;
-
-  register int total_vals;
-
-  data = (char*)rgb->imageData;
-  hue_data = (uchar*)hue->data.ptr;
-  val_data = (uchar*)val->data.ptr;
-
-  
-  total_vals = rgb->height * rgb->width;
-
-  for ( y = 0; y < total_vals; y++ )  /* rows */
-  {
-     b = data[0];
-     g = data[1];
-     r = data[2];
-     data += 3;
-
-     T456_rgb_to_hsv( r,g,b, hue_data, val_data );
-
-     hue_data++;
-     val_data++;
-
-  }
-
-}
-
-
-
-void T456_rgb_to_hsv( unsigned char r, unsigned char g, unsigned char b, 
-                 unsigned char *hue, unsigned char *val )
-{
-   unsigned char rgb_min, rgb_max, rgb_diff;
-   unsigned char sat = 0; 
-
-   rgb_min = MIN3( r, g, b );
-   rgb_max = MAX3( r, g, b );
-
-   rgb_diff = rgb_max - rgb_min;
-
-   *val = rgb_max;
-
-   if ( (rgb_diff == 0) || (*val == 0) ) {
-     *hue = 0;
-      return;
-   }
-
-   sat = 255 * (rgb_diff) / *val;
-  
-   if ( sat == 0 ) {
-     *hue = 0;
-     return;
-   }
-
-   /* Compute hue */
-   if (rgb_max == r) {
-       *hue = 0 + 43*(g - b)/(rgb_diff);
-   } else if (rgb_max == g) {
-       *hue = 85 + 43*(b - r)/(rgb_diff);
-   } else /* rgb_max == b */ {
-       *hue = 171 + 43*(r - g)/(rgb_diff);
-   }
- 
-   return;
-}
 
 
 /*

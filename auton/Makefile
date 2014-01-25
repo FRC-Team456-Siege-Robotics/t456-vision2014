@@ -53,22 +53,10 @@ target_color.o: target_color.c
 release.tar: 
 	tar -cvf $@ $(TAR_FILES)
 
-camera_config: camera_config.c
-	$(CC) $(FRCFLAGS) -o $@ `pkg-config --cflags opencv` \
-        camera_config.c `pkg-config --libs opencv` -lm
-
 parser: parse_config.c
 	$(CC) $(FRCFLAGS) `pkg-config --cflags opencv` \
         -D MAIN \
         -o $@ parse_config.c \
-        -I. -I../external/mongoose -I../external/iniparser/src\
-        `pkg-config --libs opencv` -lm -pthread -ldl \
-        -L../lib -liniparser
-
-camera_capture: camera_capture.c
-	$(CC) $(FRCFLAGS) `pkg-config --cflags opencv` \
-        -D MAIN \
-        -o $@ camera_capture.c $(SERVER_OBJS) $(SERVER_SRC) $(PARSE_OBJS) \
         -I. -I../external/mongoose -I../external/iniparser/src\
         `pkg-config --libs opencv` -lm -pthread -ldl \
         -L../lib -liniparser
