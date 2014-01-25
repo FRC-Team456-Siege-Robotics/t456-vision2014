@@ -123,11 +123,11 @@ void T456_filter_image( unsigned char r, unsigned char g, unsigned char b,
    /*
    **  Pull out saturated white pixels 
    */
-//   if ( (val >= val_thresh) && (rgb_diff <= 30 ) ) 
-//   {
-//      *binary = 0;
-//      return;
-//   }
+   if ( (val >= val_thresh) && (rgb_diff <= 30 ) ) 
+   {
+      *binary = 0;
+      return;
+   }
 
 
    /* 
