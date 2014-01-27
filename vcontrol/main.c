@@ -15,9 +15,11 @@
 #include<sys/socket.h>
 
 #define BUFLEN 1024  //Max length of buffer
-#define PORT 1140   //The port on which to listen for incoming data
-                     // UDP 1140 is incoming UDP data from CRIO 
-                     // UDP 1130 is outgoing UDP data from Vision System
+#define PORT 8889   //The port on which to listen for incoming data
+                     // UDP 8889 is incoming UDP data from CRIO 
+                     // UDP 8888 is outgoing UDP data from Vision System
+#define RED_BALL = 0
+#define BLUE_BALL = 1
 
 /*
 **  GLOBAL variables
@@ -26,6 +28,7 @@ int socket_fd;    /* incoming data socket file descriptor */
 
 void T456_UDP_init();
 void T456_UDP_read( char *);
+void parse_message(char *, int *, int *, int *);
 
 /*
 **  exit/die function
@@ -70,7 +73,8 @@ int main( int argc, char **argv)
    int prev_state;
    int auton_pid = -1;
    int balltrack_pid = -1;
-
+   int ball_color;
+   int game_time;
    /*
    **  Initialize and define current state of processes and match
    **  The possible states are:
@@ -148,8 +152,10 @@ int main( int argc, char **argv)
                break;
 
             case 2: // **   2) End Auton
-               if ( auton_pid != -1 ) 
+               if ( auton_pid != -1 ) {
                   kill(auton_pid, SIGTERM);
+                  auton_pid = -1;
+               }
                if ( balltrack_pid == -1 ) {
                   /* Spawn the auton process */
                   printf("State 2: spawning balltrack program\n");
@@ -159,10 +165,14 @@ int main( int argc, char **argv)
                break;
 
             case 3: // **   3) End Match (shutdown)
-               if ( auton_pid != -1 ) 
+               if ( auton_pid != -1 ) {
                   kill(auton_pid, SIGTERM);
-               if ( balltrack_pid != -1 ) 
+                  auton_pid = -1;
+               }
+               if ( balltrack_pid != -1 ) {
                   kill(balltrack_pid, SIGTERM);
+                  balltrack_pid = -1;
+               }
                break;
 
             case 4: // **   4) Testing: Start Ball Tracking
@@ -209,7 +219,8 @@ int main( int argc, char **argv)
       */
       T456_UDP_read(udp_message);
       printf("message: %s\n", udp_message );
-      sscanf(udp_message,"%d", &new_state);
+      parse_message(udp_message, &ball_color, &new_state, &game_time);
+//      sscanf(udp_message,"%d", &new_state);
       
    }  /* end while */
 
@@ -270,6 +281,26 @@ void T456_UDP_read( char *message )
    //print details of the client/peer and the data received
    printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
    printf("Data: %s\n" , buf);
-         
+
    strcpy( message, buf );
+}
+
+void parse_message(char *message, int *color, int *status, int *time)
+{
+   // local message parameters
+   int ball_color, stat, game_time, checksum;
+
+   // message will be of the format: MATCH_STATUS,COLOR,TIME,CHECK_SUM
+   // Parse message
+   sscanf(message,"%d,%d,%d,%d",  &stat, &ball_color, &game_time, &checksum);
+   /* we don't won't to introduce values to the system if they are corrupted,
+      so verify with checksum first */
+   printf("checksum: %d\n", checksum);
+   if ((checksum%10) == ball_color && (checksum/10) == stat) {
+       *color = ball_color;
+       *status = stat;
+       *time = game_time;
+   } else {
+       fprintf(stderr, "Recieved corrupted data from CRIO, checksum did not match\n");
+   }
 }
