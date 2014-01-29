@@ -1,4 +1,5 @@
 
+CC = gcc
 #
 #  Define include paths
 #
@@ -9,6 +10,8 @@ INC = -I ../external/iniparser/src
 #
 CFLAGS = `pkg-config --cflags opencv` $(INC)
 
+DROID_FLAGS = -O3 -mcpu=cortex-a9 -mfpu=neon -ftree-vectorize \
+              -mfloat-abi=hard -ffast-math -fsingle-precision-constant
 #
 #  Define libraries to add
 #
