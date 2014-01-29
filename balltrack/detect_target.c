@@ -4,11 +4,13 @@
 **  2014 Competition Code
 **
 */
+#include <stdio.h>
 #include "opencv2/legacy/legacy.hpp"
 
 #include "t456-vision.h"
 
-extern IplImage      *image;
+//extern IplImage      *image;
+extern IplImage      *image[MAXTHREADS];   /* image from webcam */
 extern int framenum;
 
 void draw_target_center( CvPoint , IplImage *, CvScalar );
@@ -58,11 +60,11 @@ void T456_detect_ball_target( CvMat * image_thresh )
           for ( i = 0; i < detected_circles->total; i++ )
           {
              float *p = (float *) cvGetSeqElem( detected_circles, i);
-             cvCircle( image, cvPoint(cvRound(p[0])-20, cvRound(p[1])),cvRound(p[2])+1,
-                     CV_RGB(0,255,0), -1, 8, 0);
-             draw_target_center( cvPoint(cvRound(p[0])-20, cvRound(p[1])),
-                                 image,
-                                 CV_RGB(255,0,0) );
+//             cvCircle( image, cvPoint(cvRound(p[0])-20, cvRound(p[1])),cvRound(p[2])+1,
+//                     CV_RGB(0,255,0), -1, 8, 0);
+//             draw_target_center( cvPoint(cvRound(p[0])-20, cvRound(p[1])),
+//                                 image,
+//                                 CV_RGB(255,0,0) );
           }
        }
 

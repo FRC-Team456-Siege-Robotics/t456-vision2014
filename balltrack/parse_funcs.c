@@ -72,6 +72,9 @@ void T456_parse_vision( char *input_config_file)
       /* get processing settings */
       proc_info.nthreads = iniparser_getint( dict, "computer:nthreads", 2);
       proc_info.graphics = iniparser_getint( dict, "computer:graphics", 0 );
+      proc_info.timing_check = iniparser_getint( dict, "computer:timing_check", 0 );
+      proc_info.save_frames = iniparser_getint( dict, "computer:save_frames", 0 );
+      proc_info.wait_time = iniparser_getint( dict, "computer:wait_time", 30 );
 
    }
 
@@ -98,6 +101,9 @@ void T456_set_default_settings()
 
    proc_info.nthreads = 2;
    proc_info.graphics = 0;
+   proc_info.timing_check = 0;
+   proc_info.save_frames = 0;
+   proc_info.wait_time = 30;
 }
 
 /*
@@ -120,6 +126,9 @@ void T456_print_settings()
    printf("Computer Settings: \n");
    printf("  proc_info.nthreads = %d\n", proc_info.nthreads);
    printf("  proc_info.graphics = %d\n", proc_info.graphics);
+   printf("  proc_info.timing_check = %d\n", proc_info.timing_check);
+   printf("  proc_info.save_frames = %d\n", proc_info.save_frames);
+   printf("  proc_info.wait_time = %d\n", proc_info.wait_time);
 }
 
 

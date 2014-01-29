@@ -2,6 +2,8 @@
 #define TRUE 1
 #define FALSE 0
 
+#define MAXTHREADS 4
+
 /*
 **  Structure definition for camera information 
 **   and camera dependent image processing parameters
@@ -24,8 +26,11 @@ typedef struct {
 **  Structure definition for computer processing information
 */
 typedef struct {
-  int nthreads;       /* number of processing threads, default = 2 */
-  int graphics;       /* display graphics? 0 = no, 1 = yes (default = 0) */
+  int nthreads;      /* number of processing threads, default = 2 */
+  int graphics;      /* display graphics? 0 = no, 1 = yes (default = 0) */
+  int timing_check;  /* check timing of frames? 0 = no, 1 = yes (default = 0) */
+  int save_frames;   /* save image frames? 0 = no, 1 = yes (default = 0) */
+  int wait_time;     /* wait time (ms) to check for key press */
 } proc_struct;
 
 

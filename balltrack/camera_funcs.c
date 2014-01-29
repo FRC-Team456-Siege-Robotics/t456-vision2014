@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <signal.h>
+#include <math.h>
 
 #include "t456-vision.h"
 
@@ -37,11 +38,12 @@ extern void draw_target_center( CvPoint , IplImage *, CvScalar );
 /*
 **  Local Global variables
 */
-IplImage      *image = 0;   /* image from webcam */
+IplImage      *image[MAXTHREADS];   /* image from webcam */
 int framenum = -1;
 int camera_img_width, camera_img_height;
 int STOP = FALSE;
 
+int ball_detects = 0;
 /*
 **  Local function prototypes
 */
@@ -68,6 +70,7 @@ void *T456_camera_funcs( void *arguments)
    float fps; 
    float minfps = 90000.0;
    float maxfps = 0.0;
+   int   thread_index = 0;
 
    arg_struct *args = (arg_struct *) arguments;
 
@@ -93,6 +96,11 @@ void *T456_camera_funcs( void *arguments)
    if ( signal(SIGINT, sig_handler) == SIG_IGN)
       signal(SIGINT, SIG_IGN);
 
+   if ( proc_info.graphics != 0 )
+   {
+      cvNamedWindow("Original Image", CV_WINDOW_AUTOSIZE);
+//      cvNamedWindow("Thresh Image",CV_WINDOW_AUTOSIZE);
+   }
 
    /*
    **  Setup camera capture
@@ -137,7 +145,7 @@ void *T456_camera_funcs( void *arguments)
     /*
     **  Specify how long to wait for a key press (in msec)
     */
-    waitkey_delay = 40;
+    waitkey_delay = proc_info.wait_time;  /* don't make less than 20 */
 
     /*
     **  Setup and launch image processing threads
@@ -154,21 +162,29 @@ void *T456_camera_funcs( void *arguments)
     while (cvWaitKey(waitkey_delay) < 0)
     {
        /*
+       **  Calculate thread index
+       */
+       thread_index = framenum % proc_info.nthreads;
+       if (thread_index < 0 ) thread_index = 0;
+       /*
        **  Grab initial frame from image or movie file
        */
        pthread_mutex_lock( &targ_msg_mutex);
-       image = cvQueryFrame(camera);
+       image[ thread_index ] = cvQueryFrame(camera);
        pthread_mutex_unlock( &targ_msg_mutex);
 
        /*
        **  Check and see if we reached the end of the movie or received a null
        **   image from the camera
        */
-       if ( !image ) {
+       if ( !(image[ thread_index ]) ) {
           printf("total frames: %d\n", frame_sum);
           printf("average fps: %lf\n", fps_sum / (double)frame_sum);
           printf("max fps: %f\n", maxfps);
           printf("min fps: %f\n", minfps);
+ 
+          printf("total detects: %d\n", ball_detects);
+          framenum = -1;
           return(0);
        }
 
@@ -187,7 +203,7 @@ void *T456_camera_funcs( void *arguments)
        */
        if ( proc_info.graphics != 0 )
        {
-          cvShowImage("Original Image",image);
+          cvShowImage("Original Image",image[ thread_index ]);
        }
 
        /*  
@@ -220,7 +236,7 @@ void *T456_camera_funcs( void *arguments)
     }
     framenum = -1;
 
-cvSaveImage("framegrab.jpg", image, 0 );
+cvSaveImage("framegrab.jpg", image[0], 0 );
 
 
    /*
@@ -233,6 +249,17 @@ cvSaveImage("framegrab.jpg", image, 0 );
    printf("max fps: %f\n", maxfps);
    printf("min fps: %f\n", minfps);
 
+   printf("total detections: %d\n", ball_detects);
+
+    /*
+    **  Wait for threads to finish
+    */
+    for ( i = 0; i < proc_info.nthreads; i++ )
+    {
+       pthread_join( threads[i], NULL);
+    }
+
+
 }
 
 /*
@@ -240,6 +267,7 @@ cvSaveImage("framegrab.jpg", image, 0 );
 */
 static void *T456_image_proc(void * idp)
 {
+   char framename[120];
    char stringid[40];
    int  i;
    long id = (long) idp;
@@ -258,10 +286,16 @@ static void *T456_image_proc(void * idp)
    double area = 0;
    CvPoint2D32f center;
    float radius;
+   int   thread_index = 0;
+
+   double t1, t2; 
 
    IplImage  *local_image = 0;
 
    IplConvKernel *morph_kernel;
+
+   CvVideoWriter *writer;
+   CvSize imgSize;
 
    printf("image_proc id: %ld\n", id);
    sprintf(stringid,"id %ld\n", id);
@@ -275,7 +309,7 @@ static void *T456_image_proc(void * idp)
    circle_storage = cvCreateMemStorage(0);
 
    local_image = cvCreateImage(cvSize(camera_img_width,camera_img_height),
-                               8, 3);
+                               IPL_DEPTH_8U, 3);
    image_thresh = cvCreateMat(camera_img_height, camera_img_width, CV_8UC1);
 
    /*
@@ -284,26 +318,44 @@ static void *T456_image_proc(void * idp)
    morph_kernel = cvCreateStructuringElementEx(9, 9, 1, 1,
                                                 CV_SHAPE_ELLIPSE, NULL);
  
+   imgSize.width = camera_img_width;
+   imgSize.height = camera_img_height;
 
-   while( framenum < 0 ) {
+   /*   TEMPORARY VIDEO DEBUG */
+#ifdef WRITEVIDEO
+   if ( id == 0 )
+   {
+      writer = cvCreateVideoWriter(
+                   "video_out.avi",
+                   CV_FOURCC('M','J','P','G'),
+                   60,
+                   imgSize, 1
+                ); 
+   }
+#endif
+
+   /* ========================================== */
+
+   while( framenum < proc_info.nthreads ) {
     // wait until the camera starts sending frames
      usleep(66666.0);  // sleep for 1/30 sec
    }
 
-   while( framenum != -1 )
-   {
-      /* get global frame number */
-      pthread_mutex_lock( &targ_msg_mutex);
+   pthread_mutex_lock( &targ_msg_mutex);
       local_framenum = framenum;
-      pthread_mutex_unlock( &targ_msg_mutex);
+   pthread_mutex_unlock( &targ_msg_mutex);
+
+   while( local_framenum != -1 )
+   {
 
       if (    ((local_framenum % proc_info.nthreads)  == id ) 
             && (local_framenum != prev_frame))
       {
+         t1 = (double)cvGetTickCount();
          printf("image_proc id: %ld process frame %d\n", id, local_framenum);
 
          pthread_mutex_lock( &targ_msg_mutex);
-         cvCopy(image, local_image, NULL);
+            cvCopy(image[id], local_image, NULL);
          pthread_mutex_unlock( &targ_msg_mutex);
 
          T456_change_RGB_to_binary(local_image, image_thresh, 
@@ -320,17 +372,18 @@ static void *T456_image_proc(void * idp)
          **  Find the circles in the input image and store in the 
          **   circle list structure.
          */
-         detected_circles = cvHoughCircles( image_thresh, circle_storage,
-                    CV_HOUGH_GRADIENT,
-                    1,
-                    200,     /* DON't CHANGE minimum distance between centers */
-                    645,    /* DON't CHANGE upper threshold for detector */
-                    11,     /* DON't CHANGE threshold for center detection */
-                    20,      /* min radius */
-                    240);     /* max radius */
+//         detected_circles = cvHoughCircles( image_thresh, circle_storage,
+//                    CV_HOUGH_GRADIENT,
+//                    1,
+//                    200,     /* DON't CHANGE minimum distance between centers */
+//                    645,    /* DON't CHANGE upper threshold for detector */
+//                    11,     /* DON't CHANGE threshold for center detection */
+//                    20,      /* min radius */
+//                    240);     /* max radius */
 
 
-         if ( detected_circles->total != 0 )
+//         if ( detected_circles->total != 0 )
+         if ( FALSE )
          {
             printf("num circles: %d\n",detected_circles->total);
    
@@ -340,7 +393,7 @@ static void *T456_image_proc(void * idp)
    
                if ( proc_info.graphics != 0 )
                {
-                  if ( id == 0 )
+                  if ( (id == 0) || (id == 1) )
                   {
                      cvCircle( local_image, 
                        cvPoint(cvRound(p[0]), cvRound(p[1])), cvRound(p[2]),
@@ -378,28 +431,75 @@ static void *T456_image_proc(void * idp)
 
             cvMinEnclosingCircle(polydp_contours, &center, &radius );
 
-            cvCircle( local_image, cvPointFrom32f(center), (int) radius,
+             if ( (int) radius > 40 )
+             {
+               printf("  circle at (%d,%d)\n", (int) round(center.x), 
+                                               (int) round(center.y) );
+               cvCircle( local_image, cvPointFrom32f(center), (int) radius,
                        CV_RGB(0,255,0), 1, 4, 0);
 
-             draw_target_center( cvPointFrom32f(center), 
-                                   local_image, CV_RGB(0,255,0) );
+                draw_target_center( cvPointFrom32f(center), 
+                                      local_image, CV_RGB(0,255,0) );
 
+                pthread_mutex_lock( &targ_msg_mutex);
+                ball_detects++;
+                pthread_mutex_unlock( &targ_msg_mutex);
+             }
+
+         }
+
+         if ( proc_info.timing_check != 0 ) 
+         {
+            t2 = (double)cvGetTickCount();
+            if ( ((local_framenum % 5) == 0) && (id == 0) )
+            {
+               printf(" thread elapsed time %6.2fms\n",
+                        (t2-t1)/(cvGetTickFrequency()*1000.));
+            }
+         }
+
+
+         /*
+         **  Show image
+         */
+         if ( proc_info.save_frames != 0 ) 
+         {
+            sprintf(framename,"frames/frame%04d.jpg", local_framenum);
+            cvSaveImage(framename, local_image, 0 );
+         }
+
+         prev_frame = local_framenum;
+
+         if ( proc_info.graphics != 0 )
+         {
+            if ( id == 0 )
+            {
+               cvShowImage("Thresh Image",local_image);
+#ifdef WRITEVIDEO
+               cvWriteFrame(writer, local_image);
+#endif
+            }
          }
       }
 
-      /*
-      **  Show image
-      */
-      if ( proc_info.graphics != 0 )
-      {
-         if ( id == 0 )
-            cvShowImage("Thresh Image",local_image);
-      }
 
-      prev_frame = local_framenum;
+
+      /* get global frame number */
+      pthread_mutex_lock( &targ_msg_mutex);
+         local_framenum = framenum;
+      pthread_mutex_unlock( &targ_msg_mutex);
+
    } 
    
-   cvSaveImage("framegrab_thresh.jpg", local_image, 0 );
+   sprintf(framename,"framegrab_thresh%02d.jpg", (int)id);
+   cvSaveImage(framename, local_image, 0 );
+ 
+#ifdef WRITEVIDEO
+   if ( id == 0 )
+   {
+      cvReleaseVideoWriter(&writer);
+   }
+#endif
 
    /*
    ** Clear mem storage  (important!)

@@ -31,6 +31,8 @@
 extern void *send_udp_message_func();
 extern void *T456_camera_funcs(void *);
 extern void T456_parse_vision( char *);
+extern void T456_print_settings();
+extern void *T456_write_video ();
 
 /*
 **  Global variables for messages
@@ -55,6 +57,7 @@ int main( int argc, char **argv)
    arg_struct args;
 
    pthread_t udp_msg_thread;      /* thread for messages out via UDP */
+   pthread_t video_record_thread;      /* thread for messages out via UDP */
    pthread_t cam_thread;          /* thread for camera processing */
    pthread_attr_t attr;           /* attribute thread */
 
@@ -66,6 +69,7 @@ int main( int argc, char **argv)
    **  Parse the config file and get parameters for the program
    */
    T456_parse_vision( "t456-vision.ini" );
+   T456_print_settings();
 
    /*
    **  One time function call to XInitThreads if threads need to 
@@ -108,6 +112,9 @@ int main( int argc, char **argv)
    */
    msg_ret_val = pthread_create( &udp_msg_thread, NULL,
                                  &send_udp_message_func, NULL);
+
+//   msg_ret_val = pthread_create( &video_record_thread, NULL,
+//                                &T456_write_video, NULL);
 
    T456_camera_funcs( (void *) &args);
 
