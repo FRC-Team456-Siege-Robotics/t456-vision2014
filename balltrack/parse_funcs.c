@@ -76,6 +76,13 @@ void T456_parse_vision( char *input_config_file)
       proc_info.save_frames = iniparser_getint( dict, "computer:save_frames", 0 );
       proc_info.wait_time = iniparser_getint( dict, "computer:wait_time", 30 );
 
+      if ( proc_info.nthreads > MAXTHREADS ) 
+      {
+         printf("\n**** (parse_funcs.c) ERROR: config file nthreads > MAXTHREADS\n");
+         printf("**** (parse_funcs.c)         setting nthreads = MAXTHREADS\n\n");
+         proc_info.nthreads = MAXTHREADS;
+      }
+
    }
 
    T456_print_settings();
