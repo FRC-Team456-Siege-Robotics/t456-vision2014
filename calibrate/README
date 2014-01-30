@@ -1,0 +1,9 @@
+
+Calibration procedure:
+
+1) Set robot up in autonomous position
+  then run
+  ./calibrate.csh
+
+Follow the instructions on the screen
+
