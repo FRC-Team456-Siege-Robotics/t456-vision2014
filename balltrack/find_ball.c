@@ -196,13 +196,13 @@ void *T456_find_ball(void * idp)
          **   Erode threshold image to remove small speckles and non-ball
          **    objects
          */
-         cvErode(image_thresh, image_thresh, NULL, 17);
+         cvErode(image_thresh, image_thresh, NULL, 15);
 
          /*
          **   Dilate threshold image back to original sized blobs
          **    always about two iterations larger than Erode
          */
-         cvDilate(image_thresh, image_thresh, NULL, 19);
+         cvDilate(image_thresh, image_thresh, NULL, 17);
 
          /*
          ** Find the contours in the input image and store in the

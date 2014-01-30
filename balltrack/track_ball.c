@@ -125,7 +125,7 @@ void *T456_track_ball()
          
    
 //         usleep(33333.33);  /* sleep at roughly 30 fps */
-         usleep(5111.33);  /* sleep at roughly 30 fps */
+         usleep(proc_info.wait_time * 1000);  /* sleep at same delay as camera */
    
          prev_frame = local_framenum;
       }

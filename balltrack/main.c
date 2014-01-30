@@ -46,7 +46,7 @@ pthread_mutex_t  targ_msg_mutex;        /* locking variable */
 char target_message[100];               /* message between processes */
 int  target_message_length;             /* length of message */
 
-int  REDBALL = 0;
+int  REDBALL = 1;
 int ball_detects = 0;
 
 /*
