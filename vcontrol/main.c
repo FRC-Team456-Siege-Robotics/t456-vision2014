@@ -294,9 +294,12 @@ void parse_message(char *message, int *color, int *status, int *time)
    // Parse message
    sscanf(message,"%d,%d,%d,%d",  &stat, &ball_color, &game_time, &checksum);
    /* we don't won't to introduce values to the system if they are corrupted,
-      so verify with checksum first */
-   printf("checksum: %d\n", checksum);
-   if ((checksum%10) == ball_color && (checksum/10) == stat) {
+      so verify with checksum first.
+	  Checksum is parsed as an int so take the tens digit by dividing
+	  and the ones by modulo.  Take absolute of the ones digit because
+	  we don't want it to inherit the negative sign from the 
+	  "shutdown" signal */
+   if (abs(checksum%10) == ball_color && (checksum/10) == stat) {
        *color = ball_color;
        *status = stat;
        *time = game_time;
