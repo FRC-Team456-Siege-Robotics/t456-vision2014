@@ -31,6 +31,7 @@ extern int  REDBALL;                    /* are we looking for a red/blue ball */
 
 extern int  num_tracked_targets;
 extern int  num_detected_targets[MAXTHREADS];
+extern int  targets_processed[MAXTHREADS];
 target_struct  detected_targets[MAXTHREADS][MAX_TRACKED_TARGETS];
 target_struct  tracked_targets[MAX_TRACKED_TARGETS];
 
@@ -218,6 +219,7 @@ void *T456_find_ball(void * idp)
          **   this is done here to let the target tracking code keep up
          */
          num_detected_targets[myid] = 0;
+         targets_processed[myid] = 0;
 
          /*
          ** Loop through contours and extract the interesting ones
@@ -298,6 +300,7 @@ void *T456_find_ball(void * idp)
             }
 
          }
+         targets_processed[myid] = 1;
 
          /*
          **  Process timing if required

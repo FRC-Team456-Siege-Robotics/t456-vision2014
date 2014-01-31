@@ -59,6 +59,7 @@ int camera_img_width, camera_img_height;
 
 int  num_tracked_targets = 0;
 int  num_detected_targets[MAXTHREADS];
+int  targets_processed[MAXTHREADS];
 target_struct  detected_targets[MAXTHREADS][MAX_TRACKED_TARGETS];
 target_struct  tracked_targets[MAX_TRACKED_TARGETS];
 

@@ -29,6 +29,7 @@ extern int  REDBALL;                    /* are we looking for a red/blue ball */
 
 extern int  num_tracked_targets;
 extern int  num_detected_targets[MAXTHREADS];
+extern int  targets_processed[MAXTHREADS];
 target_struct  detected_targets[MAXTHREADS][MAX_TRACKED_TARGETS];
 target_struct  tracked_targets[MAX_TRACKED_TARGETS];
 
@@ -45,6 +46,9 @@ void *T456_track_ball()
 {
    int local_framenum, prev_frame;
    int frame_indx;
+  
+   int dropped_frames = 0;
+   int skipped_frames = 0;
 
    /*
    **  Print out a friendly message to say this is working
@@ -93,6 +97,12 @@ void *T456_track_ball()
    {
       if ( local_framenum != prev_frame )
       {
+         if ( (local_framenum - prev_frame) > 1 ) 
+         {
+            printf("**** DROPPED FRAME**** \n");
+            dropped_frames++;
+         }
+
          /*
          **  See if the current frame has a target detected
          */
@@ -102,22 +112,30 @@ void *T456_track_ball()
          **  Send out updated target tracking message
          */
          pthread_mutex_lock( &targ_msg_mutex);
-         if ( num_detected_targets[frame_indx] == 0 )
+         if ( targets_processed[frame_indx] == 1 )
          {
-            target_message_length =
-               snprintf(target_message, sizeof(target_message),
-                        "%06d,0,00.0,00.0",local_framenum-1);
-         }
+            if ( num_detected_targets[frame_indx] == 0 )
+            {
+               target_message_length =
+                  snprintf(target_message, sizeof(target_message),
+                           "%06d,0,00.0,00.0",local_framenum-1);
+            }
+            else
+            {
+               target_message_length =
+                  snprintf(target_message, sizeof(target_message),
+                           "%06d,1,%3.1f,%3.1f",
+                           local_framenum-1,
+                    ((float) detected_targets[frame_indx][0].xcent - 320.0f)
+                                * camera_info.h_ifov,
+                            detected_targets[frame_indx][0].dist
+                                );
+            }
+         } 
          else
          {
-            target_message_length =
-               snprintf(target_message, sizeof(target_message),
-                        "%06d,1,%3.1f,%3.1f",
-                        local_framenum-1,
-                       ((float) detected_targets[frame_indx][0].xcent - 320.0f)
-                             * camera_info.h_ifov,
-                         detected_targets[frame_indx][0].dist
-                             );
+           /* we grabbed data before it was ready */
+           skipped_frames++;
          }
          pthread_mutex_unlock( &targ_msg_mutex);
 
@@ -125,7 +143,7 @@ void *T456_track_ball()
          
    
 //         usleep(33333.33);  /* sleep at roughly 30 fps */
-         usleep(proc_info.wait_time * 1000);  /* sleep at same delay as camera */
+         usleep(proc_info.wait_time * 1200);  /* sleep at same delay as camera */
    
          prev_frame = local_framenum;
       }
@@ -145,6 +163,8 @@ void *T456_track_ball()
    pthread_mutex_unlock( &targ_msg_mutex);
    usleep(99999);  /* sleep at same delay as camera */
 
+   printf(" **** Number of dropped frames: %d **** \n", dropped_frames);
+   printf(" **** Number of skipped frames: %d **** \n", skipped_frames);
    printf(" **** Ball tracking thread finished\n");
 }
   
