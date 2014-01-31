@@ -22,6 +22,9 @@
 
 #include <X11/Xlib.h>
 
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/legacy/legacy.hpp"
+
 #include "t456-vision.h"
 
 
@@ -33,6 +36,8 @@ extern void *T456_camera_funcs(void *);
 extern void T456_parse_vision( char *);
 extern void T456_print_settings();
 extern void *T456_write_video ();
+extern void *T456_find_ball(void *);
+extern void *T456_track_ball();
 
 /*
 **  Global variables for messages
@@ -41,11 +46,21 @@ pthread_mutex_t  targ_msg_mutex;        /* locking variable */
 char target_message[100];               /* message between processes */
 int  target_message_length;             /* length of message */
 
+int  REDBALL = 1;
+int ball_detects = 0;
+
 /*
 **  Global variables about the camera and processing
 */
+CvCapture*    camera = 0;
 camera_struct camera_info;              /* information about the camera */
-proc_struct   proc_info;                /* informaitno about processing */
+proc_struct   proc_info;                /* information about processing */
+int camera_img_width, camera_img_height;
+
+int  num_tracked_targets = 0;
+int  num_detected_targets[MAXTHREADS];
+target_struct  detected_targets[MAXTHREADS][MAX_TRACKED_TARGETS];
+target_struct  tracked_targets[MAX_TRACKED_TARGETS];
 
 /* 
 ** =================================================================
@@ -54,6 +69,7 @@ proc_struct   proc_info;                /* informaitno about processing */
 */
 int main( int argc, char **argv)
 {
+   int i;
    arg_struct args;
 
    pthread_t udp_msg_thread;      /* thread for messages out via UDP */
@@ -65,11 +81,44 @@ int main( int argc, char **argv)
    int  cam_ret_val;
    int  cam_ret_val2;
 
+   int return_val[4];
+   pthread_t threads[4];
+   pthread_t ball_track_thread;
+
    /*
    **  Parse the config file and get parameters for the program
    */
    T456_parse_vision( "t456-vision.ini" );
    T456_print_settings();
+
+   /*
+   **  Setup camera capture
+   **   0 = /dev/video0
+   **   1 = /dev/video1
+   */
+   if ( argc == 2 ) {
+     camera=cvCaptureFromFile( argv[1] );
+   }
+   else {
+     printf("Capture video from camera (%d)\n", camera_info.camera_id);
+     camera=cvCaptureFromCAM( camera_info.camera_id );
+   }
+
+   /*
+   **   Check and see if camera/file capture is valid
+   */
+   if (!camera) {
+       printf("camera or image is null\n");
+       return;
+   }
+
+   //  Get camera information (image height and width)
+   camera_img_width = cvGetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH);
+   camera_img_height = cvGetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT);
+
+   printf("image width: %d  image height: %d\n",
+              camera_img_width, camera_img_height);
+
 
    /*
    **  One time function call to XInitThreads if threads need to 
@@ -116,10 +165,44 @@ int main( int argc, char **argv)
 //   msg_ret_val = pthread_create( &video_record_thread, NULL,
 //                                &T456_write_video, NULL);
 
-   T456_camera_funcs( (void *) &args);
+   /*
+   **  Setup and launch camera frame image processing threads
+   */
+   for ( i = 0; i < proc_info.nthreads; i++ )
+   {
+       return_val[i] = pthread_create( &threads[i], NULL,
+                                 &T456_find_ball, (void *) i );
+   }
 
    /*
-   **  Wait for threads to finish
+   **  Setup and launch ball tracking process
+   */
+   msg_ret_val = pthread_create( &ball_track_thread, NULL,
+                                 &T456_track_ball, NULL);
+
+   /*
+   **  Start reading image frames from webcam (or video)
+   **   main loop is in this function call.
+   */
+   T456_read_webcam( (void *) &args);
+
+   /*
+   **  Wait nicely for image processing threads to finish
+   */
+   for ( i = 0; i < proc_info.nthreads; i++ )
+   {
+      pthread_join( threads[i], NULL);
+//      pthread_kill( threads[i], NULL);
+   }
+   printf("total detects: %d\n", ball_detects);
+
+   /*
+   **  Wait for ball tracking to finish
+   */
+   pthread_join( ball_track_thread, NULL);
+
+   /*
+   **  Just kill the udp message thread (sorry)
    */
    pthread_kill( udp_msg_thread, NULL);
 

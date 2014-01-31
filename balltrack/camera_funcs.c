@@ -26,6 +26,8 @@ extern proc_struct proc_info;             /* information about processes */
 extern pthread_mutex_t  targ_msg_mutex;   /* locking variable */
 extern char target_message[100];          /* target information message */
 extern int  target_message_length;
+extern int camera_img_width, camera_img_height;
+extern CvCapture*    camera;
 
 
 /*
@@ -40,7 +42,6 @@ extern void draw_target_center( CvPoint , IplImage *, CvScalar );
 */
 IplImage      *image[MAXTHREADS];   /* image from webcam */
 int framenum = -1;
-int camera_img_width, camera_img_height;
 int STOP = FALSE;
 
 int ball_detects = 0;
@@ -364,9 +365,9 @@ static void *T456_image_proc(void * idp)
                                      /* hue span */          60 );
 
 
-         cvErode(image_thresh, image_thresh, NULL, 19);
+         cvErode(image_thresh, image_thresh, NULL, 17);
 
-         cvDilate(image_thresh, image_thresh, NULL, 21);
+         cvDilate(image_thresh, image_thresh, NULL, 19);
 
          /*
          **  Find the circles in the input image and store in the 

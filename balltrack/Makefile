@@ -23,8 +23,9 @@ LIBS = `pkg-config --libs opencv`  -lpthread ../external/iniparser/libiniparser.
 #
 #  Object files to compile
 #
-OBJS = main.o camera_funcs.o parse_funcs.o detect_target.o \
-       udp_comm.o color_funcs.o write_video.o
+OBJS = main.o parse_funcs.o image_graphics.o \
+       udp_comm.o color_funcs.o write_video.o read_webcam.o find_ball.o \
+       track_ball.o
 
 #
 #  Compile target
@@ -44,9 +45,13 @@ clean:
 main.o:              main.c t456-vision.h
 camera_funcs.o:      camera_funcs.c t456-vision.h
 parse_funcs.o:             parse_funcs.c t456-vision.h
-detect_target.o:   detect_target.c t456-vision.h
+image_graphics.o:   image_graphics.c t456-vision.h
 udp_com.o:           udp_comm.c t456-vision.h
 color_funcs.o:       color_funcs.c t456-vision.h
 write_video.o:       write_video.c t456-vision.h
+
+read_webcam.o:       read_webcam.c t456-vision.h
+find_ball.o:       find_ball.c t456-vision.h
+track_ball.o:       track_ball.c t456-vision.h
 
 
