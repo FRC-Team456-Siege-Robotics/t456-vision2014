@@ -57,7 +57,7 @@ void *T456_track_ball()
    pthread_mutex_lock( &targ_msg_mutex);
    target_message_length =
                snprintf(target_message, sizeof(target_message),
-              "-1,0,00.0,00.0");
+              "0,0,00.0,00.0");
    pthread_mutex_unlock( &targ_msg_mutex);
 
    /*
@@ -138,6 +138,12 @@ void *T456_track_ball()
          local_framenum = framenum;
       pthread_mutex_unlock( &targ_msg_mutex);
    }
+   pthread_mutex_lock( &targ_msg_mutex);
+   target_message_length =
+               snprintf(target_message, sizeof(target_message),
+              "-1,0,00.0,00.0");
+   pthread_mutex_unlock( &targ_msg_mutex);
+   usleep(99999);  /* sleep at same delay as camera */
 
    printf(" **** Ball tracking thread finished\n");
 }
