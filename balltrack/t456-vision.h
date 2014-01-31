@@ -3,6 +3,7 @@
 #define FALSE 0
 
 #define MAXTHREADS 4
+#define MAX_TRACKED_TARGETS 10
 
 /*
 **  Structure definition for camera information 
@@ -38,3 +39,12 @@ typedef struct {
    int argc;
    char **argv;
 } arg_struct;
+
+typedef struct {
+  int xcent, ycent;
+  float radius;
+  float dist;
+  int   frame_tracked;
+  int   frame_missing;
+  int   time_tracked;
+} target_struct;

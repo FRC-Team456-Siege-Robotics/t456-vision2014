@@ -51,6 +51,7 @@ void *send_udp_message_func()
  
     while( target_message_length > 0 )
     {
+        /*  change to 10 hz */
         usleep(33333.33);  /* sleep at roughly 30 fps */
          
         pthread_mutex_lock( &targ_msg_mutex);
