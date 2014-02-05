@@ -118,7 +118,7 @@ void *T456_track_ball()
             if ( num_detected_targets[frame_indx] == 0 )
             {
                //  print string for arduino and led lights
-               printf("0 0\n");
+               printf("2 0 0\n");
   
                // set message string 
                target_message_length =
@@ -128,7 +128,7 @@ void *T456_track_ball()
             else
             {
                //  print string for arduino and led lights
-               printf("%d %.2f\n", 
+               printf("2 %d %.2f\n", 
                   detected_targets[frame_indx][0].xcent,
                   detected_targets[frame_indx][0].dist);
 
