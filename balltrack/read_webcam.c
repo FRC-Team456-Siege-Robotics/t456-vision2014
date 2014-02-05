@@ -63,9 +63,9 @@ void *T456_read_webcam( void *arguments)
 
    int  waitkey_delay = 2;
 
-   printf("Number of arguments: %d\n", args->argc);
+   fprintf(stderr,"Number of arguments: %d\n", args->argc);
    if ( args->argc == 2 ) {
-     printf("Processing video from file: %s\n", args->argv[1]);
+     fprintf(stderr,"Processing video from file: %s\n", args->argv[1]);
    }
 
    /*
@@ -113,10 +113,10 @@ void *T456_read_webcam( void *arguments)
        **   image from the camera
        */
        if ( !(image[ thread_index ]) ) {
-          printf("total frames: %d\n", frame_sum);
-          printf("average fps: %lf\n", fps_sum / (double)frame_sum);
-          printf("max fps: %f\n", maxfps);
-          printf("min fps: %f\n", minfps);
+          fprintf(stderr,"total frames: %d\n", frame_sum);
+          fprintf(stderr,"average fps: %lf\n", fps_sum / (double)frame_sum);
+          fprintf(stderr,"max fps: %f\n", maxfps);
+          fprintf(stderr,"min fps: %f\n", minfps);
  
           framenum = -1;
           return(0);
@@ -137,7 +137,7 @@ void *T456_read_webcam( void *arguments)
        fps = 1000.0 / ((t2-t1)/(cvGetTickFrequency()*1000.));
        fps_sum += fps;
        if ( (framenum % 5) == 0 )
-          printf("time: %6.2fms  fps: %6.2f framenum: %d\n",
+          fprintf(stderr,"time: %6.2fms  fps: %6.2f framenum: %d\n",
                     (t2-t1)/(cvGetTickFrequency()*1000.),
                     fps,
                     framenum
@@ -172,9 +172,9 @@ cvSaveImage("framegrab.jpg", image[0], 0 );
    */
    cvReleaseCapture(&camera);
 
-   printf("total frames: %d\n", frame_sum);
-   printf("average fps: %lf\n", fps_sum / (double)frame_sum);
-   printf("max fps: %f\n", maxfps);
-   printf("min fps: %f\n", minfps);
+   fprintf(stderr,"total frames: %d\n", frame_sum);
+   fprintf(stderr,"average fps: %lf\n", fps_sum / (double)frame_sum);
+   fprintf(stderr,"max fps: %f\n", maxfps);
+   fprintf(stderr,"min fps: %f\n", minfps);
 
 }

@@ -10,7 +10,7 @@ EXTRA_FLAGS = -O2
 #
 #  Define compile flags
 #
-CFLAGS = `pkg-config --cflags opencv` $(INC) $(EXTRA_FLAGS) $(DROID_FLAGS)
+CFLAGS = `pkg-config --cflags opencv` $(INC) $(EXTRA_FLAGS)
 
 DROID_FLAGS = -O3 -mcpu=cortex-a9 -mfpu=neon -ftree-vectorize \
               -mfloat-abi=hard -ffast-math -fsingle-precision-constant

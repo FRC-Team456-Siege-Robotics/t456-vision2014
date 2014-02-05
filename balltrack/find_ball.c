@@ -84,8 +84,8 @@ void *T456_find_ball(void * idp)
    /*
    **  Print out a friendly message to say this is working
    */
-   printf("(find_ball) image_proc id: %ld\n", id);
-   printf("***** Thread image width: %d  image height: %d\n",
+   fprintf(stderr,"(find_ball) image_proc id: %ld\n", id);
+   fprintf(stderr,"***** Thread image width: %d  image height: %d\n",
               camera_img_width, camera_img_height);
 
    /*
@@ -155,7 +155,6 @@ void *T456_find_ball(void * idp)
       if ( ((local_framenum % proc_info.nthreads)  == myid ) 
             && (local_framenum != prev_frame))
       {
-         printf("image_proc id: %d process frame %d\n", myid, local_framenum);
 
          /*  grab current tick count for timing */
          t1 = (double)cvGetTickCount();
@@ -175,9 +174,10 @@ void *T456_find_ball(void * idp)
          if ( REDBALL )
          {
             T456_change_RGB_to_binary(local_image, image_thresh, 
-                                     /* value threshold */    15,
-                                     /* hue mid threshold */ 252, 
+                                     /* value threshold */    90,
+                                     /* hue mid threshold */ 252,
                                      /* hue span */          60 );
+
          } 
          else  /* BLUEBALL */
          {
@@ -310,7 +310,7 @@ void *T456_find_ball(void * idp)
             t2 = (double)cvGetTickCount();
             if ( ((local_framenum % 5) == 0) && (id == 0) )
             {
-               printf(" thread elapsed time %6.2fms\n",
+               fprintf(stderr," thread elapsed time %6.2fms\n",
                         (t2-t1)/(cvGetTickFrequency()*1000.));
             }
          }
@@ -380,6 +380,6 @@ void *T456_find_ball(void * idp)
    /*
    ** Tell everyone we are stopping/exiting
    */
-   printf("image_proc id: %ld (exiting)\n", id);
+   fprintf(stderr,"image_proc id: %ld (exiting)\n", id);
 
 }

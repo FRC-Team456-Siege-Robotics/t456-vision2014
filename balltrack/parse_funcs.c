@@ -78,14 +78,14 @@ void T456_parse_vision( char *input_config_file)
 
       if ( proc_info.nthreads > MAXTHREADS ) 
       {
-         printf("\n**** (parse_funcs.c) ERROR: config file nthreads > MAXTHREADS\n");
-         printf("**** (parse_funcs.c)         setting nthreads = MAXTHREADS\n\n");
+         fprintf(stderr,"\n**** (parse_funcs.c) ERROR: config file nthreads > MAXTHREADS\n");
+         fprintf(stderr,"**** (parse_funcs.c)         setting nthreads = MAXTHREADS\n\n");
          proc_info.nthreads = MAXTHREADS;
       }
 
    }
 
-   T456_print_settings();
+//   T456_print_settings();
 
 
    iniparser_freedict( dict );

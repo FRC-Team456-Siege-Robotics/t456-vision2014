@@ -90,7 +90,7 @@ int main( int argc, char **argv)
    **  Parse the config file and get parameters for the program
    */
    T456_parse_vision( "t456-vision.ini" );
-   T456_print_settings();
+//   T456_print_settings();
 
    /*
    **  Setup camera capture
@@ -101,7 +101,7 @@ int main( int argc, char **argv)
      camera=cvCaptureFromFile( argv[1] );
    }
    else {
-     printf("Capture video from camera (%d)\n", camera_info.camera_id);
+     fprintf(stderr,"Capture video from camera (%d)\n", camera_info.camera_id);
      camera=cvCaptureFromCAM( camera_info.camera_id );
    }
 
@@ -109,7 +109,7 @@ int main( int argc, char **argv)
    **   Check and see if camera/file capture is valid
    */
    if (!camera) {
-       printf("camera or image is null\n");
+       fprintf(stderr,"camera or image is null\n");
        return;
    }
 
@@ -117,7 +117,7 @@ int main( int argc, char **argv)
    camera_img_width = cvGetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH);
    camera_img_height = cvGetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT);
 
-   printf("image width: %d  image height: %d\n",
+   fprintf(stderr,"image width: %d  image height: %d\n",
               camera_img_width, camera_img_height);
 
 
@@ -163,9 +163,6 @@ int main( int argc, char **argv)
    msg_ret_val = pthread_create( &udp_msg_thread, NULL,
                                  &send_udp_message_func, NULL);
 
-//   msg_ret_val = pthread_create( &video_record_thread, NULL,
-//                                &T456_write_video, NULL);
-
    /*
    **  Setup and launch camera frame image processing threads
    */
@@ -193,9 +190,8 @@ int main( int argc, char **argv)
    for ( i = 0; i < proc_info.nthreads; i++ )
    {
       pthread_join( threads[i], NULL);
-//      pthread_kill( threads[i], NULL);
    }
-   printf("total detects: %d\n", ball_detects);
+   fprintf(stderr,"total detects: %d\n", ball_detects);
 
    /*
    **  Wait for ball tracking to finish

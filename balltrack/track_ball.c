@@ -53,7 +53,7 @@ void *T456_track_ball()
    /*
    **  Print out a friendly message to say this is working
    */
-   printf("track_ball thread is running\n");
+//   printf("track_ball thread is running\n");
 
    /*
    **  Update message string
@@ -61,7 +61,7 @@ void *T456_track_ball()
    pthread_mutex_lock( &targ_msg_mutex);
    target_message_length =
                snprintf(target_message, sizeof(target_message),
-              "0,0,00.0,00.0");
+              "0 0 00.0 00.0");
    pthread_mutex_unlock( &targ_msg_mutex);
 
    /*
@@ -99,7 +99,8 @@ void *T456_track_ball()
       {
          if ( (local_framenum - prev_frame) > 1 ) 
          {
-            printf("**** DROPPED FRAME**** \n");
+            fprintf(stderr,"**** DROPPED FRAME**** (%d %d)\n", local_framenum,
+                      prev_frame);
             dropped_frames++;
          }
 
@@ -116,15 +117,25 @@ void *T456_track_ball()
          {
             if ( num_detected_targets[frame_indx] == 0 )
             {
+               //  print string for arduino and led lights
+               printf("0 0\n");
+  
+               // set message string 
                target_message_length =
                   snprintf(target_message, sizeof(target_message),
-                           "%06d,0,00.0,00.0",local_framenum-1);
+                           "1,%06d,0,00.0,00.0",local_framenum-1);
             }
             else
             {
+               //  print string for arduino and led lights
+               printf("%d %.2f\n", 
+                  detected_targets[frame_indx][0].xcent,
+                  detected_targets[frame_indx][0].dist);
+
+               // set message string 
                target_message_length =
                   snprintf(target_message, sizeof(target_message),
-                           "%06d,1,%3.1f,%3.1f",
+                           "1,%06d,1,%3.1f,%3.1f",
                            local_framenum-1,
                     ((float) detected_targets[frame_indx][0].xcent - 320.0f)
                                 * camera_info.h_ifov,
@@ -139,11 +150,8 @@ void *T456_track_ball()
          }
          pthread_mutex_unlock( &targ_msg_mutex);
 
-         printf("%s\n", target_message);
-         
-   
 //         usleep(33333.33);  /* sleep at roughly 30 fps */
-         usleep(proc_info.wait_time * 1200);  /* sleep at same delay as camera */
+         usleep(proc_info.wait_time * 1000);  /* sleep at same delay as camera */
    
          prev_frame = local_framenum;
       }
@@ -159,13 +167,13 @@ void *T456_track_ball()
    pthread_mutex_lock( &targ_msg_mutex);
    target_message_length =
                snprintf(target_message, sizeof(target_message),
-              "-1,0,00.0,00.0");
+              "0,0,00.0,00.0");
    pthread_mutex_unlock( &targ_msg_mutex);
    usleep(99999);  /* sleep at same delay as camera */
 
-   printf(" **** Number of dropped frames: %d **** \n", dropped_frames);
-   printf(" **** Number of skipped frames: %d **** \n", skipped_frames);
-   printf(" **** Ball tracking thread finished\n");
+   fprintf(stderr," **** Number of dropped frames: %d **** \n", dropped_frames);
+   fprintf(stderr," **** Number of skipped frames: %d **** \n", skipped_frames);
+   fprintf(stderr," **** Ball tracking thread finished\n");
 }
   
 
