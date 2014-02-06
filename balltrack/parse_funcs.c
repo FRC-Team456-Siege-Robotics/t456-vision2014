@@ -15,6 +15,7 @@
 */
 extern camera_struct camera_info;
 extern proc_struct proc_info;
+extern tracking_struct tracking_info;
 
 
 void T456_set_default_settings();
@@ -56,6 +57,20 @@ void T456_parse_vision( char *input_config_file)
    }
    else   /* parse the input file */
    {
+      /* get target tracking settings */
+      tracking_info.red_hue_mid_thresh = 
+             iniparser_getint( dict, "tracking:red_hue_mid_thresh", 116);
+      tracking_info.red_hue_mid_span = 
+             iniparser_getint( dict, "tracking:red_hue_mid_span", 20);
+      tracking_info.red_val_thresh = 
+             iniparser_getint( dict, "tracking:red_val)thresh", 150);
+      tracking_info.blue_hue_mid_thresh = 
+             iniparser_getint( dict, "tracking:blue_hue_mid_thresh", 116);
+      tracking_info.blue_hue_mid_span =  
+             iniparser_getint( dict, "tracking:blue_hue_mid_span", 20);
+      tracking_info.blue_val_thresh =  
+             iniparser_getint( dict, "tracking:blue_val_thresh", 150);
+
       /* get camera settings */
       camera_info.camera_id = iniparser_getint( dict, "camera:camera_id", -1);
       camera_info.h_fov =
@@ -111,6 +126,13 @@ void T456_set_default_settings()
    proc_info.timing_check = 0;
    proc_info.save_frames = 0;
    proc_info.wait_time = 30;
+
+   tracking_info.red_hue_mid_thresh = 116;
+   tracking_info.red_hue_mid_span = 20;
+   tracking_info.red_val_thresh = 150;
+   tracking_info.blue_hue_mid_thresh = 116;
+   tracking_info.blue_hue_mid_span =  20;
+   tracking_info.blue_val_thresh =  150;
 }
 
 /*

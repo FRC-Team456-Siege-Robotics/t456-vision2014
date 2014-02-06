@@ -22,6 +22,7 @@
 */
 extern camera_struct camera_info;         /* information about camera */
 extern proc_struct proc_info;             /* information about processes */
+extern tracking_struct tracking_info;     /*  tracking parameters */
 
 extern pthread_mutex_t  targ_msg_mutex;   /* locking variable */
 extern char target_message[100];          /* target information message */
@@ -174,17 +175,23 @@ void *T456_find_ball(void * idp)
          if ( REDBALL )
          {
             T456_change_RGB_to_binary(local_image, image_thresh, 
-                                     /* value threshold */    90,
-                                     /* hue mid threshold */ 252,
-                                     /* hue span */          60 );
+                                             tracking_info.red_val_thresh,
+                                             tracking_info.red_hue_mid_thresh,
+                                             tracking_info.red_hue_mid_span );
+//                                     /* value threshold */    90,
+//                                     /* hue mid threshold */ 252,
+//                                     /* hue span */          60 );
 
          } 
          else  /* BLUEBALL */
          {
             T456_change_RGB_to_binary(local_image, image_thresh, 
-                                     /* value threshold */    33,
-                                     /* hue mid threshold */ 160, 
-                                     /* hue span */          60 );
+                                             tracking_info.blue_val_thresh,
+                                             tracking_info.blue_hue_mid_thresh,
+                                             tracking_info.blue_hue_mid_span);
+//                                     /* value threshold */    33,
+//                                     /* hue mid threshold */ 160, 
+//                                     /* hue span */          60 );
          }
 
          /*

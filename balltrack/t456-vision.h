@@ -48,3 +48,10 @@ typedef struct {
   int   frame_missing;
   int   time_tracked;
 } target_struct;
+
+typedef struct {
+  int red_hue_mid_thresh, red_hue_mid_span;
+  int blue_hue_mid_thresh, blue_hue_mid_span;
+  int   red_val_thresh;
+  int   blue_val_thresh;
+} tracking_struct;

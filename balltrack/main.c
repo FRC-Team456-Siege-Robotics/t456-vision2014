@@ -55,6 +55,8 @@ int ball_detects = 0;
 CvCapture*    camera = 0;
 camera_struct camera_info;              /* information about the camera */
 proc_struct   proc_info;                /* information about processing */
+tracking_struct tracking_info;          /*  tracking parameters */
+
 int camera_img_width, camera_img_height;
 
 int  num_tracked_targets = 0;
