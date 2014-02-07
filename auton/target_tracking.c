@@ -229,13 +229,13 @@ void target_tracking( int argc, char** argv )
     cvNamedWindow("binary image", CV_WINDOW_AUTOSIZE);
 //    cvNamedWindow("contours", CV_WINDOW_AUTOSIZE);
 //    cvNamedWindow("original", CV_WINDOW_KEEPRATIO);
-printf("camera_img_fps: %d\n", camera_img_fps);
+fprintf(stderr,"camera_img_fps: %d\n", camera_img_fps);
  
     camera_img_fps = 30;
 
     if (camera_img_fps < 0 ) {
        camera_img_fps = 30;
-       printf("camera_img_fps: %d\n", camera_img_fps);
+       fprintf(stderr,"camera_img_fps: %d\n", camera_img_fps);
     }
 
 #ifdef WRITE_VIDEO
@@ -250,7 +250,7 @@ printf("camera_img_fps: %d\n", camera_img_fps);
 #endif /* WRITE_VIDEO */
 
     waitkey_delay = (int) ((1.0f / (float) camera_img_fps) * 1000.0f);
-    printf("waitkey_delay: %d\n", waitkey_delay);
+    fprintf(stderr,"waitkey_delay: %d\n", waitkey_delay);
     if ( (waitkey_delay > 50) || (waitkey_delay == 0) ) waitkey_delay = 2;
 #endif /* GRAPHICS */
 
