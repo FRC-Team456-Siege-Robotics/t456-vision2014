@@ -1,3 +1,10 @@
+#
+#  Define include paths
+#
+INC = -I ../external/iniparser/src
+LIBS = ../external/iniparser/libiniparser.a
+
+CFLAGS = $(INC)
 
 OBJS = main.o
 

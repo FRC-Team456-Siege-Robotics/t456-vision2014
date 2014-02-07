@@ -14,12 +14,23 @@
 #include<arpa/inet.h>
 #include<sys/socket.h>
 
+#include "iniparser.h"
+
 #define BUFLEN 1024  //Max length of buffer
-#define PORT 8889   //The port on which to listen for incoming data
-                     // UDP 8889 is incoming UDP data from CRIO 
+#define PORT 8880   //The port on which to listen for incoming data
+                     // UDP 8880 is incoming UDP data from CRIO 
                      // UDP 8888 is outgoing UDP data from Vision System
 #define RED_BALL = 0
 #define BLUE_BALL = 1
+
+struct {
+  char *auton;
+  char *balltrack;
+  char *logfile;
+} process_info; 
+
+void  T456_parse_config(char *);
+void  T456_set_default_settings();
 
 /*
 **  GLOBAL variables
@@ -94,15 +105,17 @@ int main( int argc, char **argv)
    **  setup the argument list 
    */
    char *arg_list[] = {
-      "my_auto_stub",   /*  argv[0], the name of the program */
+      "t456_auto_tracking",   /*  argv[0], the name of the program */
       NULL    /* the argument list must terminate with NULL */
    };
    char *arg_balllist[] = {
-      "balltrack",   /*  argv[0], the name of the program */
+      "t456_balltrack",   /*  argv[0], the name of the program */
       NULL    /* the argument list must terminate with NULL */
    };
 
    printf("parent process ID %d\n", (int) getpid() );
+
+   T456_parse_config("t456-vcontrol.ini");
 
    /*
    **  Initialize the UDP communication
@@ -134,7 +147,14 @@ int main( int argc, char **argv)
                break;
 
             case 0:   /* startup, begin auton program */
-               if ( auton_pid == -1 ) {
+               /* just in case we are reversing states, kill balltracking */
+               if ( balltrack_pid != -1 ) 
+               {
+                  kill(balltrack_pid, SIGTERM);
+                  usleep(50000);
+               }
+               if ( auton_pid == -1 ) 
+               {
                   /* Spawn the auton process */
                   printf("State 0: spawning auton program\n");
                   auton_pid = spawn("./auto_stub", arg_list);
@@ -143,6 +163,12 @@ int main( int argc, char **argv)
                break;
 
             case 1: // **   1) Begin Auton
+               /* just in case we are reversing states, kill balltracking */
+               if ( balltrack_pid != -1 ) 
+               {
+                  kill(balltrack_pid, SIGTERM);
+                  usleep(50000);
+               }
                if ( auton_pid == -1 ) {
                   /* Spawn the auton process */
                   printf("State 1: spawning auton program\n");
@@ -165,6 +191,7 @@ int main( int argc, char **argv)
                break;
 
             case 3: // **   3) End Match (shutdown)
+               printf("End Match. SHUTDOWN\n");
                if ( auton_pid != -1 ) {
                   kill(auton_pid, SIGTERM);
                   auton_pid = -1;
@@ -176,35 +203,44 @@ int main( int argc, char **argv)
                break;
 
             case 4: // **   4) Testing: Start Ball Tracking
-			   if ( balltrack_pid == -1) {
-				   printf("State 4: spawning ball track program\n");
-				   balltrack_pid = spawn("./balltrack_stub", arg_balllist);
-			       printf("balltrack process id: %d\n", balltrack_pid);
-			   }
+               if ( balltrack_pid == -1) 
+               {
+                  printf("State 4: spawning ball track program\n");
+                  balltrack_pid = spawn("./balltrack_stub", arg_balllist);
+                  printf("balltrack process id: %d\n", balltrack_pid);
+               }
                break;
 
             case 5: // **   5) Testing: Stop Ball Tracking
-			   if ( balltrack_pid != -1) {
-				   printf("State 5: killing ball track program\n");
-				   kill(balltrack_pid, SIGTERM);
-				   balltrack_pid = -1;
-			   }
+               if ( balltrack_pid != -1) 
+               {
+                  printf("State 5: killing ball track program\n");
+                  kill(balltrack_pid, SIGTERM);
+                  balltrack_pid = -1;
+               }
                break;
 
             case 6: // **   6) Testing: Start Auton Tracking
-			   if ( auton_pid == -1 ) {
-				   printf("State 5: spawning auton program\n");
-				   auton_pid = spawn("./auton_stub", arg_list);
-				   printf("auton pid: %d\n", auton_pid);
-			   }
+               /* just in case we are reversing states, kill balltracking */
+               if ( balltrack_pid != -1 ) 
+               {
+                  kill(balltrack_pid, SIGTERM);
+                  usleep(50000);
+               }
+               if ( auton_pid == -1 ) 
+               {
+                  printf("State 5: spawning auton program\n");
+                  auton_pid = spawn("./auton_stub", arg_list);
+                  printf("auton pid: %d\n", auton_pid);
+               }
                break;
 
             case 7: // **   7) Testing: Stop Auton Tracking
-			   if ( auton_pid != -1 ) {
-				   printf("State 7: killing auton program\n");
-				   kill(auton_pid, SIGTERM);
-				   auton_pid = -1;
-			   }
+               if ( auton_pid != -1 ) {
+                  printf("State 7: killing auton program\n");
+                  kill(auton_pid, SIGTERM);
+                  auton_pid = -1;
+               }
                break;
 
             default:
@@ -220,7 +256,6 @@ int main( int argc, char **argv)
       T456_UDP_read(udp_message);
       printf("message: %s\n", udp_message );
       parse_message(udp_message, &ball_color, &new_state, &game_time);
-//      sscanf(udp_message,"%d", &new_state);
       
    }  /* end while */
 
@@ -299,11 +334,69 @@ void parse_message(char *message, int *color, int *status, int *time)
 	  and the ones by modulo.  Take absolute of the ones digit because
 	  we don't want it to inherit the negative sign from the 
 	  "shutdown" signal */
-   if (abs(checksum%10) == ball_color && (checksum/10) == stat) {
+   if ( (ball_color + stat) == checksum )
+   {
        *color = ball_color;
        *status = stat;
        *time = game_time;
    } else {
        fprintf(stderr, "Recieved corrupted data from CRIO, checksum did not match\n");
    }
+}
+
+
+/*
+**  Parse input configuration file
+*/
+
+void T456_parse_config(char *input_config_file)
+{
+   dictionary *dict;
+
+   fprintf(stderr, "Parsing input config file: %s\n", input_config_file);
+
+   /*
+   **  load and parse the input file
+   */
+   dict = iniparser_load( input_config_file );
+
+   /*
+   **  check and see if the file is valid
+   */
+   if ( dict == NULL )
+   {
+      fprintf(stderr, " ***WARNING*** Cannot parse or find configuration file\n");
+      fprintf(stderr,
+         " ***WARNING***    Using DEFAULT camera and image settings\n");
+      /*  
+      ** set camera default settings 
+      */
+      T456_set_default_settings();
+      return;
+   }
+   else   /* parse the input file */
+   {
+      /* get process settings */
+      process_info.auton = 
+         iniparser_getstring( dict, 
+              "process:auton", "/usr/local/bin/auton");
+      process_info.balltrack =
+         iniparser_getstring( dict, 
+              "process:balltrack", "/usr/local/bin/balltrack");
+      process_info.logfile = 
+         iniparser_getstring( dict, 
+              "process:logfile", "/tmp/vcontrol.log");
+   }
+
+   iniparser_freedict( dict );
+}
+
+/*
+**  Set camera defaults if no config file is available
+*/
+void T456_set_default_settings()
+{
+   process_info.auton = "/usr/local/bin/auton";
+   process_info.balltrack = "/usr/local/bin/balltrack";
+   process_info.logfile = "/tmp/vcontrol.log";
 }
