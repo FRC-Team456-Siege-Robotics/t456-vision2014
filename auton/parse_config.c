@@ -62,11 +62,12 @@ void T456_parse_vision( char *input_config_file)
    }
    else   /* parse the input file */
    {
-      /*  iniparser_dump( dict, stderr); */
+      iniparser_dump( dict, stderr); 
 
       /*
       **  GET CAMERA SETTINGS
       */
+      camera_info.camera_id = iniparser_getint( dict, "camera:camera_id", 0);
       camera_info.h_fov = 
          (float) iniparser_getdouble( dict, "camera:h_fov", 48.8);
       camera_info.v_fov = 
@@ -110,6 +111,7 @@ void T456_parse_vision( char *input_config_file)
 */
 void T456_set_camera_and_tracking_defaults()
 {
+   camera_info.camera_id = 0;
    camera_info.h_fov = 48.8;
    camera_info.v_fov = 37.648;
    camera_info.h_pixels = 640;
@@ -136,6 +138,7 @@ void T456_print_camera_and_tracking_settings()
 {
    printf("\n");
    printf("Camera Settings: \n");
+   printf("  camera_info.camera_id = %d\n", camera_info.camera_id);
    printf("  camera_info.h_fov = %.2f\n", camera_info.h_fov);
    printf("  camera_info.v_fov = %.2f\n", camera_info.v_fov);
    printf("  camera_info.h_pixels = %d\n", camera_info.h_pixels);

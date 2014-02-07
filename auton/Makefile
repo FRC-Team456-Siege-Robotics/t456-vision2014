@@ -23,7 +23,7 @@ PANDA_FLAGS = -mcpu=cortex-a9 -mfpu=neon -ftree-vectorize -fsingle-precision-con
 #
 #FRCFLAGS = -O4  -D GRAPHICS
 #FRCFLAGS =  -fPIC -Wall -O6  -D GRAPHICS
-FRCFLAGS =  -fPIC -O6  -D GRAPHICS -D UDP_SERVER
+FRCFLAGS =  -fPIC -O3 -D UDP_SERVER
 
 CFLAGS = $(FRCFLAGS) `pkg-config --cflags opencv` 
 

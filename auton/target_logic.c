@@ -80,8 +80,8 @@ int determine_hot_goal ( frame_cnt )
       {
           if ( j != i) 
           {
-              printf("target %d: orientation: %d\n",
-                         i, tracked_targets[i].orientation );
+//              printf("target %d: orientation: %d\n",
+//                         i, tracked_targets[i].orientation );
        
               /* check orientation of targets */
               if ( tracked_targets[i].orientation != 

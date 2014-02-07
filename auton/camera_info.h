@@ -7,6 +7,7 @@ typedef struct {
   /*
   **  camera hardware specs
   */
+  int   camera_id;    /* camera id */
   float h_fov;        /* camera horizontal field of view (degrees) */
   float v_fov;        /* camera vertical field of view (degrees) */
   int h_pixels;       /* camera horizontal image pixels */

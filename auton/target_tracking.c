@@ -140,6 +140,14 @@ void target_tracking( int argc, char** argv )
     */
     num_tracked_targets = 0;
 
+    /*
+    **  Parse the config file
+    */
+    T456_parse_vision( "t456-vision.ini" );
+//    T456_parse_vision( "/usr/local/config/t456-vision.ini" );
+    T456_print_camera_and_tracking_settings();
+
+
     /*  
     **  Capture images from webcam /dev/video0 
     **   /dev/video0 = 0
@@ -147,8 +155,9 @@ void target_tracking( int argc, char** argv )
     */
     if ( argc == 1 || (argc == 2 && strlen(argv[1]) == 1 && isdigit(argv[1][0])))
     {
-       printf(" Capturing image from camera\n");
-       camera=cvCaptureFromCAM( argc == 2 ? argv[1][0] - '0' : 0 );
+       printf(" Capturing image from camera: ");
+       printf(" /dev/video%d \n", camera_info.camera_id);
+       camera=cvCaptureFromCAM( camera_info.camera_id );
     } 
     else 
     {
@@ -175,19 +184,8 @@ void target_tracking( int argc, char** argv )
     camera_img_height = cvGetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT);
     camera_img_fps = cvGetCaptureProperty(camera, CV_CAP_PROP_FPS);
 
-    cvSetCaptureProperty( camera, CV_CAP_PROP_EXPOSURE, 500.0);
-    cvSetCaptureProperty( camera, CV_CAP_PROP_EXPOSURE, 500.0);
-    cvSetCaptureProperty( camera, CV_CAP_PROP_AUTO_EXPOSURE, 0.0);
-
     imgSize.width = camera_img_width;
     imgSize.height = camera_img_height;
-    /*
-    **  Parse the config file
-    */
-    T456_parse_vision( "t456-vision.ini" );
-//    T456_parse_vision( "/usr/local/config/t456-vision.ini" );
-    T456_print_camera_and_tracking_settings();
-
     /*
     **  Initialize initial message to control system
     **   this is done before spawning communication thread
