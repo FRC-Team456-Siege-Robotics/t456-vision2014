@@ -24,9 +24,8 @@
 #define BLUE_BALL = 1
 
 struct {
-  char *auton;
-  char *balltrack;
-  char *logfile;
+  char auton[120];
+  char balltrack[120];
 } process_info; 
 
 void  T456_parse_config(char *);
@@ -117,6 +116,9 @@ int main( int argc, char **argv)
 
    T456_parse_config("t456-vcontrol.ini");
 
+   printf("   using auton exec: %s\n", process_info.auton);
+   printf("   using balltrack exec: %s\n", process_info.balltrack);
+
    /*
    **  Initialize the UDP communication
    */
@@ -157,7 +159,7 @@ int main( int argc, char **argv)
                {
                   /* Spawn the auton process */
                   printf("State 0: spawning auton program\n");
-                  auton_pid = spawn("./auto_stub", arg_list);
+                  auton_pid = spawn(process_info.auton, arg_list);
                   printf("auton process id: %d\n", auton_pid );
                }
                break;
@@ -172,7 +174,7 @@ int main( int argc, char **argv)
                if ( auton_pid == -1 ) {
                   /* Spawn the auton process */
                   printf("State 1: spawning auton program\n");
-                  auton_pid = spawn("./auto_stub", arg_list);
+                  auton_pid = spawn(process_info.auton, arg_list);
                   printf("auton process id: %d\n", auton_pid );
                }
                break;
@@ -185,7 +187,7 @@ int main( int argc, char **argv)
                if ( balltrack_pid == -1 ) {
                   /* Spawn the auton process */
                   printf("State 2: spawning balltrack program\n");
-                  balltrack_pid = spawn("./balltrack_stub", arg_balllist);
+                  balltrack_pid = spawn(process_info.balltrack, arg_balllist);
                   printf("balltrack process id: %d\n", balltrack_pid );
                }
                break;
@@ -206,7 +208,7 @@ int main( int argc, char **argv)
                if ( balltrack_pid == -1) 
                {
                   printf("State 4: spawning ball track program\n");
-                  balltrack_pid = spawn("./balltrack_stub", arg_balllist);
+                  balltrack_pid = spawn(process_info.balltrack, arg_balllist);
                   printf("balltrack process id: %d\n", balltrack_pid);
                }
                break;
@@ -230,7 +232,7 @@ int main( int argc, char **argv)
                if ( auton_pid == -1 ) 
                {
                   printf("State 5: spawning auton program\n");
-                  auton_pid = spawn("./auton_stub", arg_list);
+                  auton_pid = spawn(process_info.auton, arg_list);
                   printf("auton pid: %d\n", auton_pid);
                }
                break;
@@ -377,15 +379,10 @@ void T456_parse_config(char *input_config_file)
    else   /* parse the input file */
    {
       /* get process settings */
-      process_info.auton = 
-         iniparser_getstring( dict, 
-              "process:auton", "/usr/local/bin/auton");
-      process_info.balltrack =
-         iniparser_getstring( dict, 
-              "process:balltrack", "/usr/local/bin/balltrack");
-      process_info.logfile = 
-         iniparser_getstring( dict, 
-              "process:logfile", "/tmp/vcontrol.log");
+      strcpy(process_info.auton, iniparser_getstring( dict, 
+              "process:auton", "./auton"));
+      strcpy(process_info.balltrack, iniparser_getstring( dict, 
+              "process:balltrack", "./balltrack"));
    }
 
    iniparser_freedict( dict );
@@ -396,7 +393,6 @@ void T456_parse_config(char *input_config_file)
 */
 void T456_set_default_settings()
 {
-   process_info.auton = "/usr/local/bin/auton";
-   process_info.balltrack = "/usr/local/bin/balltrack";
-   process_info.logfile = "/tmp/vcontrol.log";
+   strcpy(process_info.auton,"/usr/local/bin/auton");
+   strcpy(process_info.balltrack,"/usr/local/bin/balltrack");
 }
