@@ -12,9 +12,10 @@
 #include<arpa/inet.h>
 #include<sys/socket.h>
  
-#define SERVER "127.0.0.1"
+// #define SERVER "127.0.0.1"
+#define SERVER "10.4.56.2"
 #define BUFLEN 1024  //Max length of buffer
-#define PORT 8888   //The port on which to send data
+#define PORT 8889   //The port on which to send data
  
 extern pthread_mutex_t  targ_msg_mutex;
 

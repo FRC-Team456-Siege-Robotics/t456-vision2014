@@ -61,7 +61,7 @@ void *T456_track_ball()
    pthread_mutex_lock( &targ_msg_mutex);
    target_message_length =
                snprintf(target_message, sizeof(target_message),
-              "0 0 00.0 00.0");
+              "0,0,00.0,00.0");
    pthread_mutex_unlock( &targ_msg_mutex);
 
    /*
@@ -123,7 +123,7 @@ void *T456_track_ball()
                // set message string 
                target_message_length =
                   snprintf(target_message, sizeof(target_message),
-                           "1,%06d,0,00.0,00.0",local_framenum-1);
+                           "%06d,0,00.0,00.0",local_framenum-1);
             }
             else
             {
@@ -135,7 +135,7 @@ void *T456_track_ball()
                // set message string 
                target_message_length =
                   snprintf(target_message, sizeof(target_message),
-                           "1,%06d,1,%3.1f,%3.1f",
+                           "%06d,1,%3.1f,%3.1f",
                            local_framenum-1,
                     ((float) detected_targets[frame_indx][0].xcent - 320.0f)
                                 * camera_info.h_ifov,
