@@ -28,7 +28,7 @@ extern pthread_mutex_t  targ_msg_mutex;   /* locking variable */
 extern char target_message[100];          /* target information message */
 extern int  target_message_length;
 
-extern int  REDBALL;                    /* are we looking for a red/blue ball */
+extern int  ball_color;     /* ball color 0 = red, 1 = blue */
 
 extern int  num_tracked_targets;
 extern int  num_detected_targets[MAXTHREADS];
@@ -172,7 +172,7 @@ void *T456_find_ball(void * idp)
          **  Convert RGB image frame to HSV and threshold (all at once)
          **   based on ball color we are looking for
          */
-         if ( REDBALL )
+         if ( ball_color == 0 )  /* RED ball */
          {
             T456_change_RGB_to_binary(local_image, image_thresh, 
                                              tracking_info.red_val_thresh,

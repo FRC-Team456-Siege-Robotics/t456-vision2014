@@ -46,7 +46,7 @@ pthread_mutex_t  targ_msg_mutex;        /* locking variable */
 char target_message[100];               /* message between processes */
 int  target_message_length;             /* length of message */
 
-int  REDBALL = 1;
+int ball_color = 0;       /* 0 = RED, 1 = BLUE */
 int ball_detects = 0;
 
 /*
@@ -56,6 +56,7 @@ CvCapture*    camera = 0;
 camera_struct camera_info;              /* information about the camera */
 proc_struct   proc_info;                /* information about processing */
 tracking_struct tracking_info;          /*  tracking parameters */
+
 
 int camera_img_width, camera_img_height;
 
@@ -100,7 +101,30 @@ int main( int argc, char **argv)
    **   1 = /dev/video1
    */
    if ( argc == 2 ) {
-     camera=cvCaptureFromFile( argv[1] );
+     /*  two arguments, can either be a number or a file */
+     if ( isdigit(argv[1][0]) )
+     {
+        ball_color = argv[1][0] - '0';
+
+        if ( (ball_color > 1) || (ball_color < 0 ) ) {
+           fprintf(stderr,"Incorrect ball color (%d): setting to default\n",
+                     ball_color );
+           ball_color = 0;
+        }
+
+        if ( ball_color == 0 )
+           fprintf(stderr,"Tracking RED ball\n");
+        else
+           fprintf(stderr,"Tracking BLUE ball\n");
+
+        fprintf(stderr,"Capture video from camera (%d)\n", 
+                  camera_info.camera_id);
+        camera=cvCaptureFromCAM( camera_info.camera_id );
+     }
+     else 
+     {
+       camera=cvCaptureFromFile( argv[1] );
+     }
    }
    else {
      fprintf(stderr,"Capture video from camera (%d)\n", camera_info.camera_id);

@@ -25,7 +25,7 @@ extern pthread_mutex_t  targ_msg_mutex;   /* locking variable */
 extern char target_message[100];          /* target information message */
 extern int  target_message_length;
 
-extern int  REDBALL;                    /* are we looking for a red/blue ball */
+extern int   ball_color;    /* 0 = RED, 1 = BLUE */
 
 extern int  num_tracked_targets;
 extern int  num_detected_targets[MAXTHREADS];
