@@ -1,9 +1,17 @@
 
 #include <stdio.h>
 
-void main()
+void main( int argc, char **argv )
 {
   printf("Balltracking program running\n");
+
+  if ( argc == 2 )
+  {
+     if ((argv[1][0] - '0') == 0 )
+        printf("tracking RED ball\n");
+     else
+        printf("tracking BLUE ball\n");
+  }
 
   while(1)
   {

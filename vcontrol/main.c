@@ -83,7 +83,7 @@ int main( int argc, char **argv)
    int prev_state;
    int auton_pid = -1;
    int balltrack_pid = -1;
-   int ball_color;
+   int ball_color = 0;     /* default color ( 0 = red, 1 = blue ) */
    int game_time;
    /*
    **  Initialize and define current state of processes and match
@@ -107,8 +107,9 @@ int main( int argc, char **argv)
       "t456_auto_tracking",   /*  argv[0], the name of the program */
       NULL    /* the argument list must terminate with NULL */
    };
-   char *arg_balllist[] = {
+   char *arg_balllist[3] = {
       "t456_balltrack",   /*  argv[0], the name of the program */
+      "0",              /*  0 = red, default ball color */
       NULL    /* the argument list must terminate with NULL */
    };
 
@@ -153,7 +154,8 @@ int main( int argc, char **argv)
                if ( balltrack_pid != -1 ) 
                {
                   kill(balltrack_pid, SIGTERM);
-                  usleep(50000);
+                  balltrack_pid = -1;
+                  sleep(1);
                }
                if ( auton_pid == -1 ) 
                {
@@ -169,7 +171,8 @@ int main( int argc, char **argv)
                if ( balltrack_pid != -1 ) 
                {
                   kill(balltrack_pid, SIGTERM);
-                  usleep(50000);
+                  balltrack_pid = -1;
+                  sleep(1);
                }
                if ( auton_pid == -1 ) {
                   /* Spawn the auton process */
@@ -183,10 +186,14 @@ int main( int argc, char **argv)
                if ( auton_pid != -1 ) {
                   kill(auton_pid, SIGTERM);
                   auton_pid = -1;
+                  sleep(1);
                }
                if ( balltrack_pid == -1 ) {
                   /* Spawn the auton process */
                   printf("State 2: spawning balltrack program\n");
+                  printf("           ball color: %d\n", ball_color);
+                  if ( ball_color == 0 ) arg_balllist[1] = "0";
+                  else arg_balllist[1] = "1";
                   balltrack_pid = spawn(process_info.balltrack, arg_balllist);
                   printf("balltrack process id: %d\n", balltrack_pid );
                }
@@ -208,6 +215,8 @@ int main( int argc, char **argv)
                if ( balltrack_pid == -1) 
                {
                   printf("State 4: spawning ball track program\n");
+                  if ( ball_color == 0 ) arg_balllist[1] = "0";
+                  else arg_balllist[1] = "1";
                   balltrack_pid = spawn(process_info.balltrack, arg_balllist);
                   printf("balltrack process id: %d\n", balltrack_pid);
                }
@@ -227,7 +236,8 @@ int main( int argc, char **argv)
                if ( balltrack_pid != -1 ) 
                {
                   kill(balltrack_pid, SIGTERM);
-                  usleep(50000);
+                  balltrack_pid = -1;
+                  sleep(1);
                }
                if ( auton_pid == -1 ) 
                {
@@ -258,7 +268,7 @@ int main( int argc, char **argv)
       T456_UDP_read(udp_message);
       printf("message: %s\n", udp_message );
       parse_message(udp_message, &ball_color, &new_state, &game_time);
-      
+
    }  /* end while */
 
    printf("done with the main program\n");
