@@ -143,7 +143,7 @@ void target_tracking( int argc, char** argv )
     /*
     **  Parse the config file
     */
-    T456_parse_vision( "t456-vision.ini" );
+    T456_parse_vision( "t456-auton.ini" );
 //    T456_parse_vision( "/usr/local/config/t456-vision.ini" );
     T456_print_camera_and_tracking_settings();
 
