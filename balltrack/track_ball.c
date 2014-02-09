@@ -128,7 +128,7 @@ void *T456_track_ball()
             else
             {
                //  print string for arduino and led lights
-               printf("2 %d %.2f\n", 
+               printf("2 %d %.0f\n", 
                   detected_targets[frame_indx][0].xcent,
                   detected_targets[frame_indx][0].dist);
 
