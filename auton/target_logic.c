@@ -67,10 +67,7 @@ int determine_hot_goal ( frame_cnt )
    if ( num_tracked_targets < 2 )
    {
       HOT_GOAL = FALSE;
-        
-       printf("one goal!\n");
-      
-        return( HOT_GOAL );
+      return( HOT_GOAL );
    } 
 
    /*  debug print section to verify orientation */

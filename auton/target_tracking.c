@@ -53,6 +53,8 @@ tracking_struct tracking;
 lut_struct lut_3pt;
 lut_struct lut_2pt;
 
+extern int ball_color;  /* 0  = red, 1 = blue */
+
 int  pid;
 char filename[240];
 /*
@@ -145,7 +147,7 @@ void target_tracking( int argc, char** argv )
     */
     T456_parse_vision( "t456-auton.ini" );
 //    T456_parse_vision( "/usr/local/config/t456-vision.ini" );
-    T456_print_camera_and_tracking_settings();
+//    T456_print_camera_and_tracking_settings();
 
 
     /*  
@@ -155,8 +157,8 @@ void target_tracking( int argc, char** argv )
     */
     if ( argc == 1 || (argc == 2 && strlen(argv[1]) == 1 && isdigit(argv[1][0])))
     {
-       printf(" Capturing image from camera: ");
-       printf(" /dev/video%d \n", camera_info.camera_id);
+       fprintf(stderr," Capturing image from camera: ");
+       fprintf(stderr," /dev/video%d \n", camera_info.camera_id);
        camera=cvCaptureFromCAM( camera_info.camera_id );
     } 
     else 
@@ -173,7 +175,7 @@ void target_tracking( int argc, char** argv )
     **   Check and see if camera/file capture is valid
     */
     if (!camera) {
-        printf("camera or image is null\n");
+        fprintf(stderr,"camera or image is null\n");
         return;
     }
 
@@ -209,7 +211,7 @@ void target_tracking( int argc, char** argv )
    /**  Initialize the mutex (locking/unlocking for message info) */
    if (pthread_mutex_init(&targ_msg_mutex, NULL))
    {
-      printf("Unable to initialize a mutex for message\n");
+      fprintf(stderr,"Unable to initialize a mutex for message\n");
       exit(-1);
    }
 
@@ -344,34 +346,36 @@ waitkey_delay = 2.0;
         if ( num_tracked_targets > 1 )
         {
            HOT_GOAL = determine_hot_goal( frame_cnt );
-
-           if (HOT_GOAL) {
-              printf("HOT GOAL!!\n");
-           } else {
-              printf("no hot goal.\n");
-           }
         }
 
 
         /*
         **  Print out tracked targets
         */
-        printf("%d ", frame_cnt);
+        if ( num_tracked_targets > 0 ) {
+             printf("tracked targets: num: %d frame: %d\n", 
+                        num_tracked_targets, frame_cnt);
+        }
         for ( i = 0; i < num_tracked_targets; i++ ) 
         {
-             printf("%d ", tracked_targets[i].type);
-             printf("%.2f %.2f ", tracked_targets[i].h_angle, 
-                                  tracked_targets[i].v_angle);
-             printf("%.2f %.2f ", tracked_targets[i].xcenter, 
-                                  tracked_targets[i].ycenter);
-             printf("(%.2f) ", tracked_targets[i].aspect_ratio);
-             printf("(d: %.3f) ", tracked_targets[i].distance);
-             printf("%d ", tracked_targets[i].time_tracked);
+             printf("   type: %d ", tracked_targets[i].type);
+             printf("aspect: (%.2f) ", tracked_targets[i].aspect_ratio);
+//             printf("%.2f %.2f ", tracked_targets[i].h_angle, 
+//                                  tracked_targets[i].v_angle);
+//             printf("%.2f %.2f ", tracked_targets[i].xcenter, 
+//                                  tracked_targets[i].ycenter);
+             printf("d: (%.1f) ", tracked_targets[i].distance);
+//             printf("%d ", tracked_targets[i].time_tracked);
 
              draw_target_center( tracked_targets[i],
                                   image, CV_RGB(255,255,0) );
+             printf("\n");
         }
-        printf("\n");
+
+        if (HOT_GOAL) 
+        {
+             printf("   ** hot goal ** \n");
+        }
 
         /*
         **  pass selected target information into target message
@@ -415,7 +419,32 @@ waitkey_delay = 2.0;
         t2 = (double)cvGetTickCount();
         fps = 1000.0 / ((t2-t1)/(cvGetTickFrequency()*1000.));
         fps_sum = fps_sum + fps;
+
+        if ( (frame_cnt % 30) == 0 ) {
+           fprintf(stderr," %7d",frame_cnt);
+        }
+        if ( (frame_cnt % 180) == 0 ) {
+           fprintf(stderr,"\n");
+        }
+
+        /*
+        ** print signal string to arduino
+        */
+        if ( (frame_cnt % 2) == 0 ) {
+           printf("1 %d %d\n",ball_color, HOT_GOAL);
+        }
+
+        /*
+        **  increment frame counter
+        */
         frame_cnt++;
+
+
+        /*
+        **  reset HOT_GOAL
+        */
+        HOT_GOAL = FALSE;
+
 
 #ifdef DIAG
         printf("time: %gms  fps: %.2g\n",(t2-t1)/(cvGetTickFrequency()*1000.),fps);
@@ -627,8 +656,6 @@ void Detect_Targets( CvSeq *raw_contours, CvMat *input_image )
       **  Calculate aspect ratio
       */
       aspect_ratio = MAX( length_1/length_2, length_2/length_1);
-
-printf("aspect_ratio: %f\n", aspect_ratio);
 
       /*
       **  Calculate center of object

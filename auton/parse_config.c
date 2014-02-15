@@ -62,7 +62,7 @@ void T456_parse_vision( char *input_config_file)
    }
    else   /* parse the input file */
    {
-      iniparser_dump( dict, stderr); 
+      // iniparser_dump( dict, stderr); 
 
       /*
       **  GET CAMERA SETTINGS
