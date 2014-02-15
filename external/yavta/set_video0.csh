@@ -27,5 +27,7 @@
 #  Set Absolute Exposure to 2
 # control 0x009a0902 `Exposure (Absolute)' min 2 max 5000 step 1 default 312 
 #
-./yavta --set-control '0x009a0902 60' /dev/video0
+./yavta --set-control '0x009a0902 8' /dev/video0
+
+exit 0;
 

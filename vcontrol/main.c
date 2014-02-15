@@ -209,6 +209,9 @@ int main( int argc, char **argv)
                   kill(balltrack_pid, SIGTERM);
                   balltrack_pid = -1;
                }
+               sleep(5);
+               printf("Issuing shutdown command\n");
+               system("/sbin/shutdown -h now");
                break;
 
             case 4: // **   4) Testing: Start Ball Tracking
