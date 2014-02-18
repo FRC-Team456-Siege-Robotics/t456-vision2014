@@ -2,6 +2,36 @@
 /*
 **  FRC Team 456 Siege Robotics
 **  Control code for 2014 competition
+**
+**  Reads input commands from UDP port and controls/directs vision processing
+**
+**  CAUTION:
+**   anything printed out to stdio (normal printf) will be redirected to the Arduino
+**   place debug statements and general information status to stderr
+**
+**  FORMAT:
+**   Match Status = AKA State  (integer)
+**   Alliance Color = AKA Ball Color ( integer, 0 = red, 1 = blue )
+**   Match Time = elapsed match time (float)
+**   Ball Tracking = Ball tracking enabled (1 = yes, 0 = no )
+**   Ball Loaded = Ball loaded (1 = yes, 0 = no)
+**   Checksum (error checking) = Status + Color + Tracking + Loaded
+**
+**  The possible states are:
+**   0) Startup  (Initial state from system boot)
+**   1) Begin Auton
+**   2) Start Ball Tracking
+**   3) End Match (shutdown)
+**   4) Testing: Start Ball Tracking
+**   5) Testing: Stop Ball Tracking
+**   6) Testing: Start Auton Tracking
+**   7) Testing: Stop Auton Tracking
+**  -1) Exit w no shutdown (kill all processes)
+**
+Examples:
+0,0,1.0,0,1,1   startup, red, 1 sec elaped time, no tracking, ball loaded, checksum
+2,1,30.5,1,0,5  ball tracking, blue, 30. sec elat, tracking, no ball loaded, checksum
+**
 */
 
 #include <stdio.h>
@@ -17,7 +47,7 @@
 #include "iniparser.h"
 
 #define BUFLEN 1024  //Max length of buffer
-#define PORT 8880   //The port on which to listen for incoming data
+#define PORT 8881   //The port on which to listen for incoming data
                      // UDP 8880 is incoming UDP data from CRIO 
                      // UDP 8888 is outgoing UDP data from Vision System
 #define RED_BALL = 0
@@ -38,7 +68,7 @@ int socket_fd;    /* incoming data socket file descriptor */
 
 void T456_UDP_init();
 void T456_UDP_read( char *);
-void parse_message(char *, int *, int *, int *);
+void parse_message(char *, int *, int *, float *, int *, int *);
 
 /*
 **  exit/die function
@@ -84,13 +114,17 @@ int main( int argc, char **argv)
    int auton_pid = -1;
    int balltrack_pid = -1;
    int ball_color = 0;     /* default color ( 0 = red, 1 = blue ) */
-   int game_time;
+   float game_time;
+
+   int tracking = 0;
+   int ball_loaded = 0;
+
    /*
    **  Initialize and define current state of processes and match
    **  The possible states are:
    **   0) Startup  (Initial state from system boot)
-   **   1) Begin Auton
-   **   2) End Auton
+   **   1) Start Auton target tracking
+   **   2) Start Ball Tracking
    **   3) End Match (shutdown)
    **   4) Testing: Start Ball Tracking
    **   5) Testing: Stop Ball Tracking
@@ -113,12 +147,12 @@ int main( int argc, char **argv)
       NULL    /* the argument list must terminate with NULL */
    };
 
-   printf("parent process ID %d\n", (int) getpid() );
+   fprintf(stderr,"parent process ID %d\n", (int) getpid() );
 
    T456_parse_config("t456-vcontrol.ini");
 
-   printf("   using auton exec: %s\n", process_info.auton);
-   printf("   using balltrack exec: %s\n", process_info.balltrack);
+   fprintf(stderr, "   using auton exec: %s\n", process_info.auton);
+   fprintf(stderr,"   using balltrack exec: %s\n", process_info.balltrack);
 
    /*
    **  Initialize the UDP communication
@@ -131,17 +165,17 @@ int main( int argc, char **argv)
    */
    while(1)
    {
-      printf("CURRENT STATE: %d\n", CURRENT_STATE);
 
       if (new_state != CURRENT_STATE )
       {
          prev_state = CURRENT_STATE;
          CURRENT_STATE = new_state;
+         fprintf(stderr, "CURRENT STATE: %d\n", CURRENT_STATE);
 
          switch(CURRENT_STATE)
          {
             case -1:   /* kill all processes and quit */
-               printf("Received quit state: killing child processes.\n"); 
+               fprintf(stderr, "Received quit state: killing child processes.\n"); 
                if ( auton_pid != -1 ) 
                   kill(auton_pid, SIGTERM);
                if ( balltrack_pid != -1 ) 
@@ -160,9 +194,9 @@ int main( int argc, char **argv)
                if ( auton_pid == -1 ) 
                {
                   /* Spawn the auton process */
-                  printf("State 0: spawning auton program\n");
+                  fprintf(stderr,"State 0: spawning auton program\n");
                   auton_pid = spawn(process_info.auton, arg_list);
-                  printf("auton process id: %d\n", auton_pid );
+                  fprintf(stderr, "auton process id: %d\n", auton_pid );
                }
                break;
 
@@ -176,9 +210,9 @@ int main( int argc, char **argv)
                }
                if ( auton_pid == -1 ) {
                   /* Spawn the auton process */
-                  printf("State 1: spawning auton program\n");
+                  fprintf(stderr,"State 1: spawning auton program\n");
                   auton_pid = spawn(process_info.auton, arg_list);
-                  printf("auton process id: %d\n", auton_pid );
+                  fprintf(stderr,"auton process id: %d\n", auton_pid );
                }
                break;
 
@@ -190,17 +224,17 @@ int main( int argc, char **argv)
                }
                if ( balltrack_pid == -1 ) {
                   /* Spawn the auton process */
-                  printf("State 2: spawning balltrack program\n");
-                  printf("           ball color: %d\n", ball_color);
+                  fprintf(stderr,"State 2: spawning balltrack program\n");
+                  fprintf(stderr,"           ball color: %d\n", ball_color);
                   if ( ball_color == 0 ) arg_balllist[1] = "0";
                   else arg_balllist[1] = "1";
                   balltrack_pid = spawn(process_info.balltrack, arg_balllist);
-                  printf("balltrack process id: %d\n", balltrack_pid );
+                  fprintf(stderr,"balltrack process id: %d\n", balltrack_pid );
                }
                break;
 
             case 3: // **   3) End Match (shutdown)
-               printf("End Match. SHUTDOWN\n");
+               fprintf(stderr,"End Match. SHUTDOWN\n");
                if ( auton_pid != -1 ) {
                   kill(auton_pid, SIGTERM);
                   auton_pid = -1;
@@ -210,25 +244,25 @@ int main( int argc, char **argv)
                   balltrack_pid = -1;
                }
                sleep(5);
-               printf("Issuing shutdown command\n");
+               fprintf(stderr,"Issuing shutdown command\n");
                system("/sbin/shutdown -h now");
                break;
 
             case 4: // **   4) Testing: Start Ball Tracking
                if ( balltrack_pid == -1) 
                {
-                  printf("State 4: spawning ball track program\n");
+                  fprintf(stderr,"State 4: spawning ball track program\n");
                   if ( ball_color == 0 ) arg_balllist[1] = "0";
                   else arg_balllist[1] = "1";
                   balltrack_pid = spawn(process_info.balltrack, arg_balllist);
-                  printf("balltrack process id: %d\n", balltrack_pid);
+                  fprintf(stderr,"balltrack process id: %d\n", balltrack_pid);
                }
                break;
 
             case 5: // **   5) Testing: Stop Ball Tracking
                if ( balltrack_pid != -1) 
                {
-                  printf("State 5: killing ball track program\n");
+                  fprintf(stderr,"State 5: killing ball track program\n");
                   kill(balltrack_pid, SIGTERM);
                   balltrack_pid = -1;
                }
@@ -244,22 +278,22 @@ int main( int argc, char **argv)
                }
                if ( auton_pid == -1 ) 
                {
-                  printf("State 5: spawning auton program\n");
+                  fprintf(stderr,"State 5: spawning auton program\n");
                   auton_pid = spawn(process_info.auton, arg_list);
-                  printf("auton pid: %d\n", auton_pid);
+                  fprintf(stderr,"auton pid: %d\n", auton_pid);
                }
                break;
 
             case 7: // **   7) Testing: Stop Auton Tracking
                if ( auton_pid != -1 ) {
-                  printf("State 7: killing auton program\n");
+                  fprintf(stderr,"State 7: killing auton program\n");
                   kill(auton_pid, SIGTERM);
                   auton_pid = -1;
                }
                break;
 
             default:
-               printf("Unknown state! %d\n", CURRENT_STATE);
+               fprintf(stderr,"Unknown state! %d\n", CURRENT_STATE);
                CURRENT_STATE = prev_state;  /* reset back to previous */
                break;
          }
@@ -269,12 +303,13 @@ int main( int argc, char **argv)
       ** processed current state, go wait for additional messages 
       */
       T456_UDP_read(udp_message);
-      printf("message: %s\n", udp_message );
-      parse_message(udp_message, &ball_color, &new_state, &game_time);
+      fprintf(stderr, "message: %s\n", udp_message );
+      parse_message(udp_message, &ball_color, &new_state, 
+                                 &game_time, &tracking, &ball_loaded);
 
    }  /* end while */
 
-   printf("done with the main program\n");
+   fprintf(stderr,"done with the main program\n");
    
 
    return(0);
@@ -318,7 +353,7 @@ void T456_UDP_read( char *message )
    for ( i = 0; i < BUFLEN; i++ )
       buf[i] = '\0';
 
-   printf("Waiting for incoming data...");
+   fprintf(stderr,"Waiting for incoming data...");
    fflush(stdout);
          
    //try to receive some data, this is a blocking call
@@ -329,31 +364,37 @@ void T456_UDP_read( char *message )
    }
          
    //print details of the client/peer and the data received
-   printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-   printf("Data: %s\n" , buf);
+   fprintf(stderr,"Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
+   fprintf(stderr,"Data: %s\n" , buf);
 
    strcpy( message, buf );
 }
 
-void parse_message(char *message, int *color, int *status, int *time)
+void parse_message(char *message, int *color, int *status, float *time,
+                   int *tracking, int *ball_loaded)
 {
    // local message parameters
-   int ball_color, stat, game_time, checksum;
+   int ball_color, stat, checksum;
+   int in_tracking, in_ball_loaded;
+   float game_time;
 
    // message will be of the format: MATCH_STATUS,COLOR,TIME,CHECK_SUM
    // Parse message
-   sscanf(message,"%d,%d,%d,%d",  &stat, &ball_color, &game_time, &checksum);
+   sscanf(message,"%d,%d,%f,%d,%d,%d",  &stat, &ball_color, &game_time, 
+                                    &in_tracking, &in_ball_loaded, &checksum);
    /* we don't won't to introduce values to the system if they are corrupted,
       so verify with checksum first.
 	  Checksum is parsed as an int so take the tens digit by dividing
 	  and the ones by modulo.  Take absolute of the ones digit because
 	  we don't want it to inherit the negative sign from the 
 	  "shutdown" signal */
-   if ( (ball_color + stat) == checksum )
+   if ( (stat + ball_color + in_tracking + in_ball_loaded) == checksum )
    {
        *color = ball_color;
        *status = stat;
        *time = game_time;
+       *tracking = in_tracking;
+       *ball_loaded = in_ball_loaded;
    } else {
        fprintf(stderr, "Recieved corrupted data from CRIO, checksum did not match\n");
    }
@@ -406,6 +447,6 @@ void T456_parse_config(char *input_config_file)
 */
 void T456_set_default_settings()
 {
-   strcpy(process_info.auton,"/usr/local/bin/auton");
-   strcpy(process_info.balltrack,"/usr/local/bin/balltrack");
+   strcpy(process_info.auton,"../auton/auton");
+   strcpy(process_info.balltrack,"../balltrack/balltrack");
 }
