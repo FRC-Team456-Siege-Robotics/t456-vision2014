@@ -114,6 +114,7 @@ int main( int argc, char **argv)
    int auton_pid = -1;
    int balltrack_pid = -1;
    int ball_color = 0;     /* default color ( 0 = red, 1 = blue ) */
+   int prev_color = 0;
    float game_time;
 
    int tracking = 0;
@@ -137,8 +138,9 @@ int main( int argc, char **argv)
    /* 
    **  setup the argument list 
    */
-   char *arg_list[] = {
+   char *arg_list[3] = {
       "t456_auto_tracking",   /*  argv[0], the name of the program */
+      "0",                    /* ball color */
       NULL    /* the argument list must terminate with NULL */
    };
    char *arg_balllist[3] = {
@@ -211,6 +213,8 @@ int main( int argc, char **argv)
                if ( auton_pid == -1 ) {
                   /* Spawn the auton process */
                   fprintf(stderr,"State 1: spawning auton program\n");
+                  if ( ball_color == 0 ) arg_list[1] = "0";
+                  else arg_list[1] = "1";
                   auton_pid = spawn(process_info.auton, arg_list);
                   fprintf(stderr,"auton process id: %d\n", auton_pid );
                }
@@ -279,6 +283,8 @@ int main( int argc, char **argv)
                if ( auton_pid == -1 ) 
                {
                   fprintf(stderr,"State 5: spawning auton program\n");
+                  if (ball_color == 0) arg_list[1] = "0";
+                  else arg_list[1] = "1";
                   auton_pid = spawn(process_info.auton, arg_list);
                   fprintf(stderr,"auton pid: %d\n", auton_pid);
                }
@@ -306,6 +312,18 @@ int main( int argc, char **argv)
       fprintf(stderr, "message: %s\n", udp_message );
       parse_message(udp_message, &ball_color, &new_state, 
                                  &game_time, &tracking, &ball_loaded);
+
+      /* restart auton if we have a change in ball color */
+      if (ball_color != prev_color) {
+          prev_color = ball_color;
+          if (auton_pid != -1) {
+              fprintf(stderr, "Restarting auton due to ball color change\n");
+              kill(auton_pid, SIGTERM);
+              if (ball_color == 0) arg_list[1] = "0";
+              else arg_list[1] = "1";
+              auton_pid = spawn(process_info.auton, arg_list);
+          }
+      }
 
    }  /* end while */
 
