@@ -19,3 +19,6 @@ auto_stub: auto_stub.o
 
 balltrack_stub: balltrack_stub.o
 	$(CC) -o $@ balltrack_stub.o
+
+clean:
+	rm -f vcontrol auto_stub balltrack_stub *.o
