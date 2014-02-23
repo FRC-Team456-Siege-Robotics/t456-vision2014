@@ -36,7 +36,7 @@ auton: $(TARG_OBJS) $(SERVER_OBJS) $(PARSE_OBJS)
         -L../external/iniparser -liniparser
 
 clean:
-	rm -f $(OBJS) $(TARG_OBJS) $(SERVER_OBJS) $(PARSE_OBJS)
+	rm -f auton $(OBJS) $(TARG_OBJS) $(SERVER_OBJS) $(PARSE_OBJS)
 
 target_tracking.o: target_tracking.c target_info.h camera_info.h
 
