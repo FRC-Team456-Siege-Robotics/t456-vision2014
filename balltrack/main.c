@@ -49,6 +49,11 @@ int  target_message_length;             /* length of message */
 int ball_color = 0;       /* 0 = RED, 1 = BLUE */
 int ball_detects = 0;
 
+/*  
+**  Global file descriptor for serial comms with Arduino
+*/
+int serial_fd = -1;
+
 /*
 **  Global variables about the camera and processing
 */
@@ -190,6 +195,21 @@ int main( int argc, char **argv)
                                  &send_udp_message_func, NULL);
 
    /*
+   **  Open serial port to Arduino
+   */
+   serial_fd = serialport_init( "/dev/ttyACM0", 9600);
+
+   /* check for connection error to Arduino.  serial_fd < 0 is bad */
+   if ( serial_fd < 0 ) {  
+      fprintf(stderr,"BALLTRACKING: *Arduino ERROR* Unable to open com line");
+      fprintf(stderr," to Arduino.\n");
+
+      /* Arduino is not connected, so redirect output to /dev/null */
+      // serial_fd = serialport_init( "/dev/tty2", 9600);
+   } 
+   sleep(1);
+
+   /*
    **  Setup and launch camera frame image processing threads
    */
    for ( i = 0; i < proc_info.nthreads; i++ )
@@ -228,6 +248,13 @@ int main( int argc, char **argv)
    **  Just kill the udp message thread (sorry)
    */
    pthread_kill( udp_msg_thread, NULL);
+
+
+   /* 
+   **  close serial port to Arduino
+   */
+   if ( serial_fd > 0 )
+      serialport_close(serial_fd);
 
    /*
    **  All finished, exit nicely

@@ -25,7 +25,7 @@ LIBS = `pkg-config --libs opencv`  -lpthread ../external/iniparser/libiniparser.
 #
 OBJS = main.o parse_funcs.o image_graphics.o \
        udp_comm.o color_funcs.o write_video.o read_webcam.o find_ball.o \
-       track_ball.o
+       track_ball.o arduino-serial-lib.o
 
 #
 #  Compile target
@@ -53,5 +53,6 @@ write_video.o:       write_video.c t456-vision.h
 read_webcam.o:       read_webcam.c t456-vision.h
 find_ball.o:       find_ball.c t456-vision.h
 track_ball.o:       track_ball.c t456-vision.h
+arduino-serial-lib.o: arduino-serial-lib.c arduino-serial-lib.h
 
 

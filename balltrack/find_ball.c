@@ -67,6 +67,7 @@ void *T456_find_ball(void * idp)
    int local_framenum;
    int prev_frame = -2;
    CvMat *image_thresh = 0;
+   CvMat *image_debug = 0;
 
    CvSeq *contours = 0;
    CvSeq *seq = 0;
@@ -97,6 +98,7 @@ void *T456_find_ball(void * idp)
    local_image = cvCreateImage(cvSize(camera_img_width,camera_img_height),
                                IPL_DEPTH_8U, 3);
    image_thresh = cvCreateMat(camera_img_height, camera_img_width, CV_8UC1);
+   image_debug = cvCreateMat(camera_img_height, camera_img_width, CV_8UC1);
 
 
 #ifdef WRITEVIDEO
@@ -212,6 +214,12 @@ void *T456_find_ball(void * idp)
          */
          cvDilate(image_thresh, image_thresh, NULL, 17);
 
+#ifdef DEBUG
+         if ( (proc_info.graphics != 0) && (id == 0) )
+         {
+            cvCopy(image_thresh, image_debug, NULL);
+         }
+#endif
          /*
          ** Find the contours in the input image and store in the
          ** contours list structure.
@@ -340,6 +348,7 @@ void *T456_find_ball(void * idp)
          {
             if ( id == 0 )
             {
+//               cvShowImage("Thresh Image",local_image);
                cvShowImage("Thresh Image",local_image);
 #ifdef WRITEVIDEO
                cvWriteFrame(writer, local_image);

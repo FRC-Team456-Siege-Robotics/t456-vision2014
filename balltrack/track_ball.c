@@ -26,6 +26,7 @@ extern char target_message[100];          /* target information message */
 extern int  target_message_length;
 
 extern int   ball_color;    /* 0 = RED, 1 = BLUE */
+extern int   serial_fd;     /* file descriptor for serial port */
 
 extern int  num_tracked_targets;
 extern int  num_detected_targets[MAXTHREADS];
@@ -49,6 +50,8 @@ void *T456_track_ball()
   
    int dropped_frames = 0;
    int skipped_frames = 0;
+
+   char dataline[20];             /* data line for Arduino message */
 
    /*
    **  Print out a friendly message to say this is working
@@ -118,7 +121,14 @@ void *T456_track_ball()
             if ( num_detected_targets[frame_indx] == 0 )
             {
                //  print string for arduino and led lights
-               printf("2 0 0\n");
+               /*
+               ** print signal string to Arduino
+               */
+               if ( ((local_framenum % 2) == 0) && (serial_fd > 0) ) {
+                  sprintf(dataline,"2 0 0 %d\n", ball_color);
+                  serialport_write(serial_fd, dataline );
+               }
+
   
                // set message string 
                target_message_length =
@@ -128,9 +138,13 @@ void *T456_track_ball()
             else
             {
                //  print string for arduino and led lights
-               printf("2 %d %.0f\n", 
-                  detected_targets[frame_indx][0].xcent,
-                  detected_targets[frame_indx][0].dist);
+               if ( ((local_framenum % 2) == 0) && (serial_fd > 0) ) {
+                  sprintf(dataline,"2 %d %.0f %d\n", 
+                     detected_targets[frame_indx][0].xcent,
+                     detected_targets[frame_indx][0].dist,
+                     ball_color);
+                  serialport_write(serial_fd, dataline );
+               }
 
                // set message string 
                target_message_length =
@@ -169,7 +183,7 @@ void *T456_track_ball()
                snprintf(target_message, sizeof(target_message),
               "0,0,00.0,00.0");
    pthread_mutex_unlock( &targ_msg_mutex);
-   usleep(99999);  /* sleep at same delay as camera */
+   usleep(99999);  /* pause a bit to let everything else stop */
 
    fprintf(stderr," **** Number of dropped frames: %d **** \n", dropped_frames);
    fprintf(stderr," **** Number of skipped frames: %d **** \n", skipped_frames);
