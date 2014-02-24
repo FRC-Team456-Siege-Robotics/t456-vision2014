@@ -54,6 +54,7 @@ lut_struct lut_3pt;
 lut_struct lut_2pt;
 
 extern int ball_color;  /* 0  = red, 1 = blue */
+extern int serial_fd;   /* file descriptor for serial comms to Arduino */
 
 int  pid;
 char filename[240];
@@ -123,6 +124,8 @@ void target_tracking( int argc, char** argv )
     pthread_attr_t attr;           /* attribute thread */
     pthread_t udp_msg_thread;      /* thread for messages out via UDP */
     int  msg_ret_val;
+
+    char dataline[20];             /* data line for Arduino message */
     
     pid = (int) getpid();
     /*
@@ -428,10 +431,12 @@ waitkey_delay = 2.0;
         }
 
         /*
-        ** print signal string to arduino
+        ** print signal string to Arduino
         */
-        if ( (frame_cnt % 2) == 0 ) {
-           printf("1 %d %d\n",ball_color, HOT_GOAL);
+        if ( ((frame_cnt % 2) == 0) && (serial_fd > 0) ) {
+           // printf("1 %d %d\n",ball_color, HOT_GOAL);
+           sprintf(dataline,"1 %d %d\n",ball_color, HOT_GOAL);
+           serialport_write(serial_fd, dataline );
         }
 
         /*

@@ -3,14 +3,11 @@ CC = gcc
 
 TARG_OBJS = main.o target_tracking.o target_logic.o target_color.o
 
-SERVER_OBJS = target_server.o 
+SERVER_OBJS = target_server.o arduino-serial-lib.o
 
 PARSE_OBJS = parse_config.o
 
 SERVER_SRC = ../external/mongoose/mongoose.c
-
-TAR_FILES = main.c target_tracking.c target_logic.c target_color.c \
-              camera_info.h  target_info.h Makefile
 
 PANDA_FLAGS = -mcpu=cortex-a9 -mfpu=neon -ftree-vectorize -fsingle-precision-constant -ffast-math
  
@@ -36,7 +33,7 @@ auton: $(TARG_OBJS) $(SERVER_OBJS) $(PARSE_OBJS)
         -L../external/iniparser -liniparser
 
 clean:
-	rm -f $(OBJS) $(TARG_OBJS) $(SERVER_OBJS) $(PARSE_OBJS)
+	rm -f auton $(OBJS) $(TARG_OBJS) $(SERVER_OBJS) $(PARSE_OBJS)
 
 target_tracking.o: target_tracking.c target_info.h camera_info.h
 
@@ -50,8 +47,7 @@ target_server.o: target_server.c target_info.h camera_info.h
 
 target_color.o: target_color.c
 
-release.tar: 
-	tar -cvf $@ $(TAR_FILES)
+arduino-serial-lib.o: arduino-serial-lib.c arduino-serial-lib.h
 
 parser: parse_config.c
 	$(CC) $(FRCFLAGS) `pkg-config --cflags opencv` \
