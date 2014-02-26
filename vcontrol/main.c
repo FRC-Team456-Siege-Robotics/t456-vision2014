@@ -47,7 +47,7 @@ Examples:
 #include "iniparser.h"
 
 #define BUFLEN 1024  //Max length of buffer
-#define PORT 8881   //The port on which to listen for incoming data
+#define PORT 8800   //The port on which to listen for incoming data
                      // UDP 8880 is incoming UDP data from CRIO 
                      // UDP 8888 is outgoing UDP data from Vision System
 #define RED_BALL = 0
@@ -321,6 +321,7 @@ int main( int argc, char **argv)
               kill(auton_pid, SIGTERM);
               if (ball_color == 0) arg_list[1] = "0";
               else arg_list[1] = "1";
+              sleep(1);
               auton_pid = spawn(process_info.auton, arg_list);
           }
       }
