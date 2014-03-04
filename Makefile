@@ -1,5 +1,7 @@
 
 
+all: submodules balltrack auton vcontrol
+
 submodules: 
 	git submodule init
 	git submodule update
@@ -15,8 +17,6 @@ auton: submodules
 
 vcontrol: submodules balltrack auton
 	(cd vcontrol; make)
-
-all: submodules balltrack auton vcontrol
 
 clean:
 	cd external/iniparser; make clean

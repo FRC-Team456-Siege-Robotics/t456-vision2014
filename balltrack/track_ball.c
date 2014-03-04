@@ -47,6 +47,9 @@ void *T456_track_ball()
 {
    int local_framenum, prev_frame;
    int frame_indx;
+   int i;
+   int lxcent; 
+   float ldist;
   
    int dropped_frames = 0;
    int skipped_frames = 0;
@@ -137,11 +140,31 @@ void *T456_track_ball()
             }
             else
             {
+               lxcent = detected_targets[frame_indx][0].xcent;
+               ldist =  detected_targets[frame_indx][0].dist;
+
+               /*  
+               **  in the case of multiple targets, scan and pick
+               **   the closest one
+               */
+               if ( num_detected_targets[frame_indx] > 1 )
+               {
+                  for ( i = 1; i < num_detected_targets[frame_indx]; i++ )
+                  {
+                     if ( ldist < detected_targets[frame_indx][i].dist )
+                     {
+                        lxcent = detected_targets[frame_indx][i].xcent;
+                        ldist =  detected_targets[frame_indx][i].dist;
+                     }
+                 
+                  }
+               }
                //  print string for arduino and led lights
-               if ( ((local_framenum % 2) == 0) && (serial_fd > 0) ) {
+               if ( ((local_framenum % 2) == 0) && (serial_fd > 0) ) 
+               {
                   sprintf(dataline,"2 %d %.0f %d\n", 
-                     detected_targets[frame_indx][0].xcent,
-                     detected_targets[frame_indx][0].dist,
+                     lxcent,
+                     ldist,
                      ball_color);
                   serialport_write(serial_fd, dataline );
                }
@@ -151,10 +174,9 @@ void *T456_track_ball()
                   snprintf(target_message, sizeof(target_message),
                            "%06d,1,%3.1f,%3.1f",
                            local_framenum-1,
-                    ((float) detected_targets[frame_indx][0].xcent - 320.0f)
-                                * camera_info.h_ifov,
-                            detected_targets[frame_indx][0].dist
-                                );
+                           ((float) lxcent - 320.0f) * camera_info.h_ifov,
+                           ldist
+                          );
             }
          } 
          else
@@ -164,8 +186,8 @@ void *T456_track_ball()
          }
          pthread_mutex_unlock( &targ_msg_mutex);
 
-//         usleep(33333.33);  /* sleep at roughly 30 fps */
-         usleep(proc_info.wait_time * 1000);  /* sleep at same delay as camera */
+         /* sleep at same delay as camera */
+         usleep(proc_info.wait_time * 1000); 
    
          prev_frame = local_framenum;
       }
