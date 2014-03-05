@@ -278,7 +278,7 @@ fprintf(stderr,"camera_img_fps: %d\n", camera_img_fps);
     /*
     **   Process images until key press
     */
-waitkey_delay = 2.0;
+waitkey_delay = 30.0;
 
 #ifdef GRAPHICS
     while (cvWaitKey(waitkey_delay) < 0)
@@ -328,7 +328,7 @@ waitkey_delay = 2.0;
        /*
        **   Use the Morph function to join broken or speckled rectangles
        */
-//       cvMorphologyEx( image_binary, image_gray, NULL,
+//       cvMorphologyEx( image_binary, image_binary, NULL,
 //                         morph_kernel, CV_MOP_CLOSE, 
 //                         tracking.morph_closing_iterations);
 
@@ -368,7 +368,7 @@ waitkey_delay = 2.0;
 //             printf("%.2f %.2f ", tracked_targets[i].xcenter, 
 //                                  tracked_targets[i].ycenter);
              printf("d: (%.1f) ", tracked_targets[i].distance);
-//             printf("%d ", tracked_targets[i].time_tracked);
+             printf("%d ", tracked_targets[i].time_tracked);
 
              draw_target_center( tracked_targets[i],
                                   image, CV_RGB(255,255,0) );
@@ -433,7 +433,7 @@ waitkey_delay = 2.0;
         /*
         ** print signal string to Arduino
         */
-        if ( ((frame_cnt % 2) == 0) && (serial_fd > 0) ) {
+        if ( ((frame_cnt % 5) == 0) && (serial_fd > 0) ) {
            // printf("1 %d %d\n",ball_color, HOT_GOAL);
            sprintf(dataline,"1 %d %d\n",ball_color, HOT_GOAL);
            serialport_write(serial_fd, dataline );
@@ -652,6 +652,7 @@ void Detect_Targets( CvSeq *raw_contours, CvMat *input_image )
                                   xpt[3], ypt[3],
                                   xpt[2], ypt[2] ) );
       max_cosine = MAX( cosine1, cosine2 );
+
       // was 0.25
 //      if ( max_cosine > 0.45 ) {
 //         return;
@@ -681,7 +682,7 @@ void Detect_Targets( CvSeq *raw_contours, CvMat *input_image )
          distance = 0.01745 * ((MAX(length_1,length_2) / 640.0) * 48.8) / 2.0;
          distance = (32.0/2.0) / tanf(distance);
 
-         if ( (distance/12.0) < 20 ) /* field is 54 ft long */
+         if ( (distance/12.0) < 40 ) /* field is 54 ft long */
          {
             isTarget = TRUE;
             detected_targets[num_detect_targets].type = 1;
@@ -702,7 +703,7 @@ void Detect_Targets( CvSeq *raw_contours, CvMat *input_image )
          distance = 0.01745 * ((MAX(length_1,length_2) / 640.0) * 48.8) / 2.0;
          distance = (23.5/2.0) / tanf(distance);
 
-         if ( (distance/12.0) < 20 ) 
+         if ( (distance/12.0) < 40 ) 
          {
             isTarget = TRUE;
             detected_targets[num_detect_targets].type = 2;
@@ -774,9 +775,8 @@ void Detect_Targets( CvSeq *raw_contours, CvMat *input_image )
          if ( num_detect_targets < (MAX_TRACKED_TARGETS -1) )
          {
             num_detect_targets++;
-         }  else {
+         }  
 
-         }
 
       }
 
@@ -911,8 +911,6 @@ void track_targets_over_time ( int frame_cnt )
                  found = 1;
 
                  time_tracked = tracked_targets[j].time_tracked;
-
-//               printf("found match dt %d tt %d %f\n", i, j, dx);
 
                  targ_info_copy( &detected_targets[i], 
                             &tracked_targets[j]);

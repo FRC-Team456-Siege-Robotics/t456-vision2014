@@ -85,32 +85,32 @@ int determine_hot_goal ( frame_cnt )
                    tracked_targets[j].orientation) 
               {
                  /*  check and see if they are both similar distance away */
-                 /*  6.0 = 6 inches*/ 
-                       if ( fabs(tracked_targets[i].distance -
-                           tracked_targets[j].distance ) < 6.0 )
+                 /*  12.0 = 12 inches*/ 
+                if ( fabs(tracked_targets[i].distance -
+                           tracked_targets[j].distance ) < 18.0 )
                  {
                     HOT_GOAL = TRUE;
                     return(HOT_GOAL);
                  }
 		/* determine the distance in inches between the
 			targets and decide if within maximum */
-		 int distance = tracked_targets[i].xcenter - 
-					tracked_targets[j].xcenter;
-		 double angle = 48.8*distance/640.0;
+//		 int distance = tracked_targets[i].xcenter - 
+//					tracked_targets[j].xcenter;
+//		 double angle = 48.8*distance/640.0;
 
-		 if ( tan(angle/2)/tracked_targets[i].distance > 20.25 ) {
-		     HOT_GOAL = FALSE;
-		     return(HOT_GOAL);
-		 }
+//		 if ( tan(angle/2)/tracked_targets[i].distance > 20.25 ) {
+//		     HOT_GOAL = FALSE;
+//		     return(HOT_GOAL);
+//		 }
 		 /* determine the vertical distance in inches between the
 		 	targets and decide if within maxium */
-		 distance = tracked_targets[i].ycenter -
-					tracked_targets[j].ycenter;
-		 angle = 36.6*distance/480.0;
-		 if ( tan(angle/2)/tracked_targets[i].distance > 20 ) {
-		     HOT_GOAL = FALSE;
-		     return(HOT_GOAL);
-		 }
+//		 distance = tracked_targets[i].ycenter -
+//					tracked_targets[j].ycenter;
+//		 angle = 36.6*distance/480.0;
+//		 if ( tan(angle/2)/tracked_targets[i].distance > 20 ) {
+//		     HOT_GOAL = FALSE;
+//		     return(HOT_GOAL);
+//		 }
 
               }
            }
