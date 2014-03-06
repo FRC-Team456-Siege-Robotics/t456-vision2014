@@ -63,7 +63,7 @@ void T456_parse_vision( char *input_config_file)
       tracking_info.red_hue_mid_span = 
              iniparser_getint( dict, "tracking:red_hue_mid_span", 20);
       tracking_info.red_val_thresh = 
-             iniparser_getint( dict, "tracking:red_val)thresh", 150);
+             iniparser_getint( dict, "tracking:red_val_thresh", 150);
       tracking_info.blue_hue_mid_thresh = 
              iniparser_getint( dict, "tracking:blue_hue_mid_thresh", 116);
       tracking_info.blue_hue_mid_span =  
