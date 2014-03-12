@@ -1,6 +1,6 @@
 
 
-all: submodules balltrack auton vcontrol tests
+all: submodules balltrack auton vcontrol tests calibrate
 
 submodules: 
 	git submodule init
@@ -21,6 +21,8 @@ auton: submodules
 vcontrol: submodules balltrack auton
 	(cd vcontrol; make)
 
+calibrate:
+	cd calibrate; make
 
 clean:
 	cd external/iniparser; make clean
