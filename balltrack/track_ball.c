@@ -133,7 +133,7 @@ void *T456_track_ball()
                }
 
   
-               // set message string 
+               // set message string for data back to CRIO
                target_message_length =
                   snprintf(target_message, sizeof(target_message),
                            "%06d,0,00.0,00.0",local_framenum-1);
@@ -169,7 +169,7 @@ void *T456_track_ball()
                   serialport_write(serial_fd, dataline );
                }
 
-               // set message string 
+               // set message string for info back to CRIO
                target_message_length =
                   snprintf(target_message, sizeof(target_message),
                            "%06d,1,%3.1f,%3.1f",
