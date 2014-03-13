@@ -17,3 +17,5 @@ clean:
 	-rm -f *.o
 	-rm -f yavta
 
+vidclean:
+	rm -f *.mjpg

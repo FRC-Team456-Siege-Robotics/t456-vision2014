@@ -1,6 +1,6 @@
 
 
-all: submodules balltrack auton vcontrol tests calibrate
+all: submodules bt auto vc tests calib
 
 submodules: 
 	git submodule init
@@ -9,19 +9,19 @@ submodules:
 	(cd external/yavta; make)
 
 tests: vcontrol
-	(cd system_tests; make)
+	cd system_tests; make
 
-balltrack: submodules
+bt: submodules
 	echo "compiling balltrack"
-	(cd balltrack; make)
+	cd balltrack; make
 
-auton: submodules
-	(cd auton; make)
+auto: submodules
+	cd auton; make
 
-vcontrol: submodules balltrack auton
-	(cd vcontrol; make)
+vc: submodules balltrack auton
+	cd vcontrol; make
 
-calibrate:
+calib:
 	cd calibrate; make
 
 clean:
