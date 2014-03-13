@@ -922,12 +922,17 @@ void track_targets_over_time ( int frame_cnt )
 
                  pt1.x = tracked_targets[j].xcenter + 20;
                  pt1.y = tracked_targets[j].ycenter;
-            sprintf(screentext,"type: %d", tracked_targets[j].type);
+            if ( tracked_targets[j].orientation ) {
+              sprintf(screentext,"horizontal");
+            } else {
+              sprintf(screentext,"vertical");
+            }
+//            sprintf(screentext,"type: %d", tracked_targets[j].type);
             cvPutText( image, screentext, pt1, &font, CV_RGB(0,255,0));
-            sprintf(screentext,"(%.3f ft.)", tracked_targets[j].distance);
-                 pt1.x = tracked_targets[j].xcenter + 20;
-                 pt1.y = tracked_targets[j].ycenter + 20;
-            cvPutText( image, screentext, pt1, &font, CV_RGB(255,255,255));
+//            sprintf(screentext,"(%.3f ft.)", tracked_targets[j].distance);
+//                 pt1.x = tracked_targets[j].xcenter + 20;
+//                 pt1.y = tracked_targets[j].ycenter + 20;
+//            cvPutText( image, screentext, pt1, &font, CV_RGB(255,255,255));
 
                  j = MAX_TRACKED_TARGETS + 1;
               }
@@ -991,12 +996,17 @@ void track_targets_over_time ( int frame_cnt )
 
                  pt1.x = tracked_targets[i].xcenter + 20;
                  pt1.y = tracked_targets[i].ycenter;
-            sprintf(screentext,"%d pt", tracked_targets[i].type);
+            if ( tracked_targets[i].orientation ) {
+              sprintf(screentext,"horizontal");
+            } else {
+              sprintf(screentext,"vertical");
+            }
+//            sprintf(screentext,"%d pt", tracked_targets[i].type);
             cvPutText( image, screentext, pt1, &font, CV_RGB(0,255,0));
-            sprintf(screentext,"(%.0f ft.)", tracked_targets[i].distance);
-                 pt1.x = tracked_targets[i].xcenter + 20;
-                 pt1.y = tracked_targets[i].ycenter + 20;
-            cvPutText( image, screentext, pt1, &font, CV_RGB(255,255,255));
+ //           sprintf(screentext,"(%.0f ft.)", tracked_targets[i].distance);
+ //                pt1.x = tracked_targets[i].xcenter + 20;
+ //                pt1.y = tracked_targets[i].ycenter + 20;
+ //           cvPutText( image, screentext, pt1, &font, CV_RGB(255,255,255));
 
         }
      }
