@@ -22,7 +22,10 @@ PANDA_FLAGS = -mcpu=cortex-a9 -mfpu=neon -ftree-vectorize -fsingle-precision-con
 #FRCFLAGS =  -fPIC -Wall -O6  -D GRAPHICS -D WRITE_VIDEO
 #
 #  intel flags
-FRCFLAGS =  -fPIC -O3 -D UDP_SERVER -D GRAPHICS -D WRITE_VIDEO
+FRCFLAGS =  -fPIC -O3 -D UDP_SERVER
+#   with graphics and video
+#FRCFLAGS =  -fPIC -O3 -D UDP_SERVER -D GRAPHICS -D WRITE_VIDEO
+
 #  odroid flags
 #FRCFLAGS =  -fPIC -O3 -D UDP_SERVER  $(PANDA_FLAGS)
 #  odroid flags with graphics and video
