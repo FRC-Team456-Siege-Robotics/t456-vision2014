@@ -56,44 +56,44 @@ set ans = $<
 #
 ./yavta --set-control '0x009a0902 8' $vdev
 
-echo " Setting and capturing 8 ms exposure for 15 secs"
+echo " Setting and capturing 8 ms exposure for 20 secs"
 echo -n " Press <ENTER> to continue: ";
 set ans = $<
 ./yavta --set-control '0x009a0902 8' $vdev
-avconv -f video4linux2 -i $vdev -t 00:00:15 -an -qscale 1 ball_8ms_exposure.mjpg
+avconv -f video4linux2 -i $vdev -t 00:00:20 -an -qscale 1 ball_8ms_exposure.mjpg
 
-echo " Setting and capturing 10 ms exposure for 15 secs"
+echo " Setting and capturing 10 ms exposure for 20 secs"
 echo -n " Press <ENTER> to continue: ";
 set ans = $<
 ./yavta --set-control '0x009a0902 10' $vdev
-avconv -f video4linux2 -i $vdev -t 00:00:15 -an -qscale 1 ball_10ms_exposure.mjpg
+avconv -f video4linux2 -i $vdev -t 00:00:20 -an -qscale 1 ball_10ms_exposure.mjpg
 
-echo " Setting and capturing 20 ms exposure for 15 secs"
+echo " Setting and capturing 20 ms exposure for 20 secs"
 echo -n " Press <ENTER> to continue: ";
 set ans = $<
 ./yavta --set-control '0x009a0902 20' $vdev
-avconv -f video4linux2 -i $vdev -t 00:00:15 -an -qscale 1 ball_20ms_exposure.mjpg
+avconv -f video4linux2 -i $vdev -t 00:00:20 -an -qscale 1 ball_20ms_exposure.mjpg
 
-echo " Setting and capturing 30 ms exposure for 15 secs"
+echo " Setting and capturing 30 ms exposure for 20 secs"
 echo -n " Press <ENTER> to continue: ";
 set ans = $<
 ./yavta --set-control '0x009a0902 30' $vdev
-avconv -f video4linux2 -i $vdev -t 00:00:15 -an -qscale 1 ball_30ms_exposure.mjpg
+avconv -f video4linux2 -i $vdev -t 00:00:20 -an -qscale 1 ball_30ms_exposure.mjpg
 
-echo " Setting and capturing 40 ms exposure for 15 secs"
+echo " Setting and capturing 40 ms exposure for 20 secs"
 echo -n " Press <ENTER> to continue: ";
 set ans = $<
 ./yavta --set-control '0x009a0902 40' $vdev
-avconv -f video4linux2 -i $vdev -t 00:00:15 -an -qscale 1 ball_40ms_exposure.mjpg
+avconv -f video4linux2 -i $vdev -t 00:00:20 -an -qscale 1 ball_40ms_exposure.mjpg
 
-echo " Setting and capturing 60 ms exposure for 15 secs"
+echo " Setting and capturing 60 ms exposure for 20 secs"
 echo -n " Press <ENTER> to continue: ";
 set ans = $<
 ./yavta --set-control '0x009a0902 60' $vdev
-avconv -f video4linux2 -i $vdev -t 00:00:15 -an -qscale 1 ball_60ms_exposure.mjpg
+avconv -f video4linux2 -i $vdev -t 00:00:20 -an -qscale 1 ball_60ms_exposure.mjpg
 
-echo " Setting and capturing 80 ms exposure for 15 secs"
+echo " Setting and capturing 80 ms exposure for 20 secs"
 echo -n " Press <ENTER> to continue: ";
 set ans = $<
 ./yavta --set-control '0x009a0902 80' $vdev
-avconv -f video4linux2 -i $vdev -t 00:00:15 -an -qscale 1 ball_80ms_exposure.mjpg
+avconv -f video4linux2 -i $vdev -t 00:00:20 -an -qscale 1 ball_80ms_exposure.mjpg

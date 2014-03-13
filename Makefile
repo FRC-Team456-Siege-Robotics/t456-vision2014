@@ -31,4 +31,5 @@ clean:
 	cd auton; make clean
 	cd vcontrol; make clean
 	cd system_tests; make clean
+	cd calibrate; make clean
 
