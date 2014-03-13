@@ -242,7 +242,7 @@ fprintf(stderr,"camera_img_fps: %d\n", camera_img_fps);
     }
 
 #ifdef WRITE_VIDEO
-    sprintf(filename,"video_out.avi");
+    sprintf(filename,"auton_video_%d.avi",pid);
 
     writer = cvCreateVideoWriter(
                 filename,

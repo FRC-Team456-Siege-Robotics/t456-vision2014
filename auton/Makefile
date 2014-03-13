@@ -19,8 +19,14 @@ PANDA_FLAGS = -mcpu=cortex-a9 -mfpu=neon -ftree-vectorize -fsingle-precision-con
 #  -D UDP_SERVER  - target message/info via udp port
 #
 #FRCFLAGS = -O4  -D GRAPHICS
-#FRCFLAGS =  -fPIC -Wall -O6  -D GRAPHICS
+#FRCFLAGS =  -fPIC -Wall -O6  -D GRAPHICS -D WRITE_VIDEO
+#
+#  intel flags
 FRCFLAGS =  -fPIC -O3 -D UDP_SERVER
+#  odroid flags
+#FRCFLAGS =  -fPIC -O3 -D UDP_SERVER  $(PANDA_FLAGS)
+#  odroid flags with graphics and video
+#FRCFLAGS =  -fPIC -Wall -O6  -D GRAPHICS -D WRITE_VIDEO $(PANDA_FLAGS)
 
 CFLAGS = $(FRCFLAGS) `pkg-config --cflags opencv` 
 
