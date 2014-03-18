@@ -107,7 +107,8 @@ void target_tracking( int argc, char** argv )
 {
     double t1, t2, t3, t4, fps;
     int  targ_selected = 0;
-    int  camera_img_height, camera_img_width, camera_img_fps;
+    int  camera_img_height, camera_img_width; 
+    int  camera_img_fps = 27;
     int  waitkey_delay = 2;
     int  HOT_GOAL = FALSE;
 
@@ -187,7 +188,7 @@ void target_tracking( int argc, char** argv )
     */
     camera_img_width = cvGetCaptureProperty(camera, CV_CAP_PROP_FRAME_WIDTH);
     camera_img_height = cvGetCaptureProperty(camera, CV_CAP_PROP_FRAME_HEIGHT);
-    camera_img_fps = cvGetCaptureProperty(camera, CV_CAP_PROP_FPS);
+//    camera_img_fps = cvGetCaptureProperty(camera, CV_CAP_PROP_FPS);
 
     imgSize.width = camera_img_width;
     imgSize.height = camera_img_height;
@@ -234,15 +235,16 @@ void target_tracking( int argc, char** argv )
 //    cvNamedWindow("original", CV_WINDOW_KEEPRATIO);
 fprintf(stderr,"camera_img_fps: %d\n", camera_img_fps);
  
-    camera_img_fps = 30;
 
     if (camera_img_fps < 0 ) {
        camera_img_fps = 30;
        fprintf(stderr,"camera_img_fps: %d\n", camera_img_fps);
     }
+#endif /* GRAPHICS */
 
 #ifdef WRITE_VIDEO
-    sprintf(filename,"auton_video_%d.avi",pid);
+    camera_img_fps = 10;
+    sprintf(filename,"auton_video_%d.mjpg",pid);
 
     writer = cvCreateVideoWriter(
                 filename,
@@ -252,6 +254,7 @@ fprintf(stderr,"camera_img_fps: %d\n", camera_img_fps);
              );    
 #endif /* WRITE_VIDEO */
 
+#ifdef GRAPHICS
     waitkey_delay = (int) ((1.0f / (float) camera_img_fps) * 1000.0f);
     fprintf(stderr,"waitkey_delay: %d\n", waitkey_delay);
     if ( (waitkey_delay > 50) || (waitkey_delay == 0) ) waitkey_delay = 2;
@@ -405,7 +408,8 @@ waitkey_delay = 30.0;
         }
 
 #ifdef WRITE_VIDEO
-       cvWriteFrame(writer, image);
+       if ( (frame_cnt % 3) == 0 ) 
+          cvWriteFrame(writer, image);
 #endif /* WRITE_VIDEO */
 
 #ifdef GRAPHICS

@@ -164,6 +164,16 @@ void T456_filter_image( unsigned char r, unsigned char g, unsigned char b,
    {
        *binary = 255;
    }
+
+   /*
+   **  check for wrap-around on hue threshold
+   */
+   if ( (tracking.hue_mid_thresh + tracking.hue_mid_span) > 255 )
+   {
+     if ( hue <= ( 255 - (tracking.hue_mid_thresh + tracking.hue_mid_span)) )
+       *binary = 255;
+   }
+   
  
    return;
 }

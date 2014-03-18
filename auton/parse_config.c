@@ -98,8 +98,18 @@ void T456_parse_vision( char *input_config_file)
          iniparser_getint( dict, "tracking:targ_persist", 25);
       tracking.diag = 
          iniparser_getint( dict, "tracking:diag", 0);
-      tracking.h_ang_correction = 
-         (float) iniparser_getdouble( dict, "tracking:h_ang_correction", 0);
+
+      tracking.vert_targ_max_ratio = 
+       (float) iniparser_getdouble( dict, "tracking:vert_targ_max_ratio", 9.8);
+
+      tracking.vert_targ_min_ratio = 
+       (float) iniparser_getdouble( dict, "tracking:vert_targ_min_ratio", 7.2);
+
+      tracking.horz_targ_max_ratio = 
+       (float) iniparser_getdouble( dict, "tracking:horz_targ_max_ratio", 7.0);
+
+      tracking.horz_targ_min_ratio = 
+       (float) iniparser_getdouble( dict, "tracking:horz_targ_min_ratio", 5.0);
 
    }
    
@@ -127,7 +137,10 @@ void T456_set_camera_and_tracking_defaults()
    tracking.targ_match_dist = 50;
    tracking.targ_persist = 25;
    tracking.diag = 0;
-   tracking.h_ang_correction = 0.0;
+   tracking.vert_targ_max_ratio = 9.8;
+   tracking.vert_targ_min_ratio = 7.2;
+   tracking.horz_targ_max_ratio = 7.0;
+   tracking.horz_targ_min_ratio = 5.0;
 
 }
 
@@ -157,7 +170,14 @@ void T456_print_camera_and_tracking_settings()
    printf("  tracking.targ_match_dist = %d\n", tracking.targ_match_dist);
    printf("  tracking.targ_persist = %d\n", tracking.targ_persist);
    printf("  tracking.diag = %d\n", tracking.diag);
-   printf("  tracking.h_ang_correction = %.1f\n", tracking.h_ang_correction);
+   printf("  tracking.vert_targ_max_ratio = %.1f\n", 
+                                tracking.vert_targ_max_ratio);
+   printf("  tracking.vert_targ_min_ratio = %.1f\n", 
+                                tracking.vert_targ_min_ratio);
+   printf("  tracking.horz_targ_max_ratio = %.1f\n", 
+                                tracking.horz_targ_max_ratio);
+   printf("  tracking.horz_targ_min_ratio = %.1f\n", 
+                                tracking.horz_targ_min_ratio);
    printf("\n");
 
 }

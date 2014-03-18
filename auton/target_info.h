@@ -41,8 +41,11 @@ typedef struct {
   int min_rect_area;              /* minimum rectangle size (pixels^2) */
   int targ_match_dist;            /* target matching distance (pixels) */
   int targ_persist;               /* target persistence (number of frames) */
+  float vert_targ_max_ratio;      /* vertical target maximum aspect ratio */
+  float vert_targ_min_ratio;      /* vertical target minimum aspect ratio */
+  float horz_targ_max_ratio;      /* horizontal target maximum aspect ratio */
+  float horz_targ_min_ratio;      /* horizontal target minimum aspect ratio */
   int diag;                       /* tracking diagnostic level  0 = none */
-  float h_ang_correction;         /* shooter bias horizontal correction angle */
 
 } tracking_struct;
 
