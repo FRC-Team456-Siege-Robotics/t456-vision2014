@@ -7,15 +7,10 @@
 **    and image thresholding
 */
 
-#include "opencv2/highgui/highgui.hpp"
 #include "opencv2/legacy/legacy.hpp"
-#include <time.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <math.h>
 
-#include "target_externs.h"
-#include "camera_info.h"
+#include "target_info.h"
+
 
 /*
 **  External global tracking parameters
@@ -170,10 +165,10 @@ void T456_filter_image( unsigned char r, unsigned char g, unsigned char b,
    */
    if ( (tracking.hue_mid_thresh + tracking.hue_mid_span) > 255 )
    {
-     if ( hue <= ( 255 - (tracking.hue_mid_thresh + tracking.hue_mid_span)) )
+     if ( hue <= ( (tracking.hue_mid_thresh + tracking.hue_mid_span) - 255) )
        *binary = 255;
    }
-   
+
  
    return;
 }

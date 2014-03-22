@@ -1,34 +1,24 @@
 
 /*
+**  FRC Team 456 Siege Robotics
+**  Vicksburg, MS
+**  2014 Competition Code
+**
 **  Target tracking logic code
 */
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/legacy/legacy.hpp"
-#include <stdio.h>
+
 #include <math.h>
 
-#include "camera_info.h"
 #include "target_externs.h"
 
-#define TRUE 1
-#define FALSE 0
-
-#define HORIZONTAL 1
-#define VERTICAL 0
-
-#define DIST 40.5
-
 /*
-**  External global camera parameters
+**  External global variables used:
+**
+**  From "target_externs.h"
+**    num_tracked_targets - number of tracked targets in the image
+**    tracked_targets[]   - tracked target information [0..num_tracked_targets]
+**
 */
-extern camera_struct camera_info;
-extern tracking_struct tracking;
-extern IplImage *image;
-extern lut_struct lut_3pt;
-extern lut_struct lut_2pt;
-
-extern int num_tracked_targets;
-extern target_struct tracked_targets[MAX_TRACKED_TARGETS];
 
 /*
 **  Local function prototypes
@@ -53,6 +43,21 @@ int determine_hot_goal ( int );
 **      tracked_targets[i].xcenter
 **      tracked_targets[i].ycenter  (float) x,y center of the target)
 */
+
+/*
+** We have two ways to determine if the goal is hot or not.
+** 1) simply see if we have a horizontal and vertical 
+**     target at about the same distance
+** 2) calculate the slope line between centers of the 
+**     horizontal and vertical target and see it matches our calculations
+**
+** Code below implements method #1.
+*/
+
+#define TRUE 1
+#define FALSE 0
+
+
 int determine_hot_goal ( frame_cnt )
 {
    int HOT_GOAL = FALSE;   /* setup default to no hot goal (false) */
@@ -77,73 +82,37 @@ int determine_hot_goal ( frame_cnt )
       {
           if ( j != i) 
           {
-//              printf("target %d: orientation: %d\n",
-//                         i, tracked_targets[i].orientation );
-       
-              /* check orientation of targets */
+              /*
+              **  If targets have opposite orientation (vert and horz)
+              **    or (horz and vert), then continue
+              */
               if ( tracked_targets[i].orientation != 
                    tracked_targets[j].orientation) 
               {
-                 /*  check and see if they are both similar distance away */
-                 /*  12.0 = 12 inches*/ 
-                if ( fabs(tracked_targets[i].distance -
-                           tracked_targets[j].distance ) < 18.0 )
+                /*
+                **  If they have opposite orientation and are roughly
+                **   the same distance away (with some error) then
+                **   consider them a "hot" target
+                **
+                **      24.0 = 24 inches
+                */
+                if ( fabsf(tracked_targets[i].distance -
+                           tracked_targets[j].distance ) < 24.0 )
                  {
                     HOT_GOAL = TRUE;
                     return(HOT_GOAL);
                  }
-		/* determine the distance in inches between the
-			targets and decide if within maximum */
-//		 int distance = tracked_targets[i].xcenter - 
-//					tracked_targets[j].xcenter;
-//		 double angle = 48.8*distance/640.0;
 
-//		 if ( tan(angle/2)/tracked_targets[i].distance > 20.25 ) {
-//		     HOT_GOAL = FALSE;
-//		     return(HOT_GOAL);
-//		 }
-		 /* determine the vertical distance in inches between the
-		 	targets and decide if within maxium */
-//		 distance = tracked_targets[i].ycenter -
-//					tracked_targets[j].ycenter;
-//		 angle = 36.6*distance/480.0;
-//		 if ( tan(angle/2)/tracked_targets[i].distance > 20 ) {
-//		     HOT_GOAL = FALSE;
-//		     return(HOT_GOAL);
-//		 }
+              }  /* endif i.orientation != j.orientation */
 
-              }
-           }
-        }
-     }
+          } /* endif j != i */
+
+      } /* end for j = 0..num_tracked_targets */
+
+   } /* end for i = 0..num_tracked_targets */
     
    /*
-   ** We have two ways to determine if the goal is hot or not.
-   ** 1) simply see if we have a horizontal and vertical 
-   **     target at about the same distance
-   ** 2) calculate the slope line between centers of the 
-   **     horizontal and vertical target and see it matches our calculations
-   */
-
-   /*
-   ** pseudo code for #1
-   */
-//   for (i = 0; i < num_tracked_targets; i++ )
-//   {
-//      for ( j = 0; j < num_tracked_targets; j++ )
-//      {
-//         if ( i != j ) 
-//         {
-//           IF target[i] orientation is not equal to target[j] THEN
-//             HOT_GOAL = TRUE (and return)
-//           else
-//             HOT_GOAL = FALSE
-//         }
-//      }
-//   }
-
-   /*
-   ** pseudo code for #2
+   ** pseudo code for method #2
    */
 //   for (i = 0; i < num_tracked_targets; i++ )
 //   {
@@ -159,8 +128,8 @@ int determine_hot_goal ( frame_cnt )
 //            else
 //               HOT_GOAL = FALSE
 //          }
-//        }
 //      }
+//   }
 
    /* end function, return result */
    return( HOT_GOAL );

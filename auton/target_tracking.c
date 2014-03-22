@@ -7,7 +7,6 @@
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/legacy/legacy.hpp"
-#include <time.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
@@ -15,6 +14,9 @@
 
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <sys/time.h>
+#include <time.h>
 
 /* includes for udp option with threads */
 #include <stdlib.h>
@@ -127,6 +129,9 @@ void target_tracking( int argc, char** argv )
     int  msg_ret_val;
 
     char dataline[20];             /* data line for Arduino message */
+
+    time_t rawtime;
+    struct tm *timeinfo;
     
     pid = (int) getpid();
     /*
@@ -243,8 +248,25 @@ fprintf(stderr,"camera_img_fps: %d\n", camera_img_fps);
 #endif /* GRAPHICS */
 
 #ifdef WRITE_VIDEO
-    camera_img_fps = 10;
+
+    rawtime = time(NULL);
+
+    printf("The date is: %s\n", ctime(&rawtime) );
+
+    timeinfo = localtime(&rawtime);
+
+    printf("%d\n", timeinfo->tm_min);
+
+
     sprintf(filename,"auton_video_%d.mjpg",pid);
+
+
+    sprintf(filename, "a%02d%02d-%02d%02d.mjpg", 
+           timeinfo->tm_mon, timeinfo->tm_mday, timeinfo->tm_hour,
+            timeinfo->tm_min);
+
+
+    camera_img_fps = 10;
 
     writer = cvCreateVideoWriter(
                 filename,
@@ -424,7 +446,7 @@ waitkey_delay = 30.0;
         ** keep time of processing 
         */
         t2 = (double)cvGetTickCount();
-        fps = 1000.0 / ((t2-t1)/(cvGetTickFrequency()*1000.));
+        fps = 1000.0 / ((t2-t1)/((float)cvGetTickFrequency()*1000.));
         fps_sum = fps_sum + fps;
 
         if ( (frame_cnt % 30) == 0 ) {

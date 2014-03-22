@@ -10,6 +10,8 @@ PARSE_OBJS = parse_config.o
 SERVER_SRC = ../external/mongoose/mongoose.c
 
 PANDA_FLAGS = -mcpu=cortex-a9 -mfpu=neon -ftree-vectorize -fsingle-precision-constant -ffast-math
+
+INTEL_FLAGS = -Ofast -fsingle-precision-constant -ffast-math
  
 #  Useful compile flags
 #  -D DIAG        - print out useful diagnostic information
@@ -18,18 +20,18 @@ PANDA_FLAGS = -mcpu=cortex-a9 -mfpu=neon -ftree-vectorize -fsingle-precision-con
 #  -D HTTP_SERVER - target message/info via http server :8080
 #  -D UDP_SERVER  - target message/info via udp port
 #
-#FRCFLAGS = -O4  -D GRAPHICS
-#FRCFLAGS =  -fPIC -Wall -O6  -D GRAPHICS -D WRITE_VIDEO
+#FRCFLAGS = -D GRAPHICS
+#FRCFLAGS =  -Wall -D GRAPHICS -D WRITE_VIDEO
 #
 #  intel flags
-FRCFLAGS =  -fPIC -O3 -D UDP_SERVER -D WRITE_VIDEO
+FRCFLAGS =  $(INTEL_FLAGS) -D UDP_SERVER -D WRITE_VIDEO
 #   with graphics and video
-#FRCFLAGS =  -fPIC -O3 -D UDP_SERVER -D GRAPHICS -D WRITE_VIDEO
+#FRCFLAGS =  -D UDP_SERVER -D GRAPHICS -D WRITE_VIDEO
 
 #  odroid flags
-#FRCFLAGS =  -fPIC -O3 -D UDP_SERVER  $(PANDA_FLAGS)
+#FRCFLAGS =  -D UDP_SERVER  $(PANDA_FLAGS)
 #  odroid flags with graphics and video
-#FRCFLAGS =  -fPIC -Wall -O6  -D GRAPHICS -D WRITE_VIDEO $(PANDA_FLAGS)
+#FRCFLAGS =  -Wall -O6  -D GRAPHICS -D WRITE_VIDEO $(PANDA_FLAGS)
 
 CFLAGS = $(FRCFLAGS) `pkg-config --cflags opencv` 
 
