@@ -24,7 +24,7 @@ INTEL_FLAGS = -Ofast -fsingle-precision-constant -ffast-math
 #FRCFLAGS =  -Wall -D GRAPHICS -D WRITE_VIDEO
 #
 #  intel flags
-FRCFLAGS =  $(INTEL_FLAGS) -D UDP_SERVER -D WRITE_VIDEO
+FRCFLAGS =  $(INTEL_FLAGS) -D UDP_SERVER -D GRAPHICS -D WRITE_VIDEO
 #   with graphics and video
 #FRCFLAGS =  -D UDP_SERVER -D GRAPHICS -D WRITE_VIDEO
 

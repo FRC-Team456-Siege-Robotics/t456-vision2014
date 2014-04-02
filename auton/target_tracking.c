@@ -699,7 +699,11 @@ void Detect_Targets( CvSeq *raw_contours, CvMat *input_image )
       **  check for vertical target (4" by 32")
       **   aspect ratio = 8.0
       */
-      if ( ((aspect_ratio > 7.2) && (aspect_ratio < 9.8)) ) 
+//      if ( ((aspect_ratio > 7.2) && (aspect_ratio < 9.8)) ) 
+      if (  (aspect_ratio > tracking.vert_targ_min_ratio) 
+              && 
+            (aspect_ratio < tracking.vert_targ_max_ratio) 
+         ) 
       {
          /*
          **  Calculate distance to vertical target
@@ -720,7 +724,11 @@ void Detect_Targets( CvSeq *raw_contours, CvMat *input_image )
       **  check for horizontal target (4" by 23.5")
       **   aspect ratio = 5.875
       */
-      if ( ((aspect_ratio >= 5.0) && (aspect_ratio <= 7.0)) ) 
+//      if ( ((aspect_ratio >= 5.0) && (aspect_ratio <= 7.0)) ) 
+      if (  (aspect_ratio >= tracking.horz_targ_min_ratio) 
+              && 
+            (aspect_ratio <= tracking.horz_targ_max_ratio) 
+         ) 
       {
          /*
          **  Calculate distance to target
